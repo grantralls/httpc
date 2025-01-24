@@ -52,10 +52,28 @@ void test_callback() {
     printf("Test callback");
 }
 
+void print_each_entry(char* message) {
+    while(strlen(message) != 0) {
+        message++;
+        int len = 0;
+        while(message[len] != '\0' && message[len] != '/') {
+            len++;
+        }
+        char newString[len];
+        strncpy(newString, message, len);
+        printf("%s\n", newString);
+        memset(newString, 0, len);
+        message += len;
+    }
+}
+
 int main(int argc, char const* argv[]) {
-    setup();
-    register_route("GET /test", &test_callback);
-    print_tree(&root);
+    /*setup();*/
+    /*register_route("GET /test", &test_callback);*/
+    /*print_tree(&root);*/
+    char* message = "/some/silly/uri";
+    print_each_entry(message);
+
     return 0;
 }
 
