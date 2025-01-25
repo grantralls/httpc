@@ -6,38 +6,94 @@
 #include <unistd.h>
 #define PORT 8080
 
-struct node {
+typedef struct node {
     char* val;
     struct node* children;
     struct node* siblings;
     void (*callback)();
-};
+} node;
 
-struct node root = {};
+/**
+* @brief Searches the tree in a DFS manner to find the node with the val
+* @param root the root of the tree
+* @param val the val we want to look for
+* @returns a pointer to a node if one was found, NULL if none was found
+*/
+node* find_node_by_val(node* root, char* val) {
+    if(!strcmp(root->val, val)) {
+        return root;
+    }
+    if(root->children != NULL) {
+        return find_node_by_val(root->children, val);
+    } else if(root->siblings != NULL) {
+        return find_node_by_val(root->siblings, val);
+    }
+
+    return NULL;
+}
+
+node root = {};
+node newNode = {};
 
 void root_callback() {
     printf("Send 200");
 }
 
-void setup() {
-    root.val = "GET /";
-    root.callback = &root_callback;
+void new_node_callback() {
+
 }
 
-void register_node(struct node* root, struct node* newNode) {
-    if(root->children == NULL) {
-        root->children = newNode;
+void setup() {
+    root.val = "/";
+    root.callback = &root_callback;
+    newNode.val = "test";
+    newNode.callback = &new_node_callback;
+    root.children = &newNode;
+}
+
+// TODO: actually make this work
+void register_node(node* root, node* newNode) {
+    char* newRoute = newNode->val;
+    char* message = newNode->val;
+    node* newRoot = root;
+    while(strlen(message) != 0) {
+        message++;
+        int len = 0;
+        while(message[len] != '\0' && message[len] != '/') {
+            len++;
+        }
+        char newString[len];
+        strncpy(newString, message, len);
+
+        printf("message: %s\n", newString);
+        node* foundRoot = find_node_by_val(newRoot, newString);
+        if(foundRoot != NULL) {
+            newRoot = foundRoot;
+        } else {
+            strncpy(newRoute, message, len);
+            printf("%s\n", newString);
+        }
+
+        memset(newString, 0, len);
+        message += len;
     }
 }
 
 void register_route(char* route, void (*callback)()) {
-    struct node* newNode = malloc(sizeof(struct node));
+    node* newNode = malloc(sizeof(node));
+    while(route[0] != '/') {
+        route++;
+    }
     newNode->val = route;
     newNode->callback = callback;
     register_node(&root, newNode);
 }
 
-void print_tree(struct node* n) {
+/**
+ * @brief traverse the tree in a depth first way
+ * @param n The root of the tree
+ */
+void print_tree(node* n) {
     printf("%s\n", n->val);
     n->callback();
     printf("\n");
@@ -48,31 +104,29 @@ void print_tree(struct node* n) {
     }
 }
 
+
 void test_callback() {
     printf("Test callback");
 }
 
+// "/some/uri/resource"
 void print_each_entry(char* message) {
     while(strlen(message) != 0) {
         message++;
         int len = 0;
-        while(message[len] != '\0' && message[len] != '/') {
+        while(message[len + 1] != '\0' && message[len] != '/') {
             len++;
         }
         char newString[len];
         strncpy(newString, message, len);
         printf("%s\n", newString);
-        memset(newString, 0, len);
         message += len;
     }
 }
 
 int main(int argc, char const* argv[]) {
-    /*setup();*/
-    /*register_route("GET /test", &test_callback);*/
-    /*print_tree(&root);*/
-    char* message = "/some/silly/uri";
-    print_each_entry(message);
+    setup();
+    register_route("GET /test/something", &test_callback);
 
     return 0;
 }
@@ -85,13 +139,11 @@ int create_server() {
     char buffer[1024] = { 0 };
     char* hello = "HTTP/1.0 200 \r\n";
 
-    // Creating socket file descriptor
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) { 
         perror("socket failed"); 
         exit(EXIT_FAILURE);
     }
 
-    // Forcefully attaching socket to port 8080
     if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
         perror("setsockopt");
         exit(EXIT_FAILURE);
@@ -100,7 +152,6 @@ int create_server() {
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(PORT);
 
-    // Forcefully attaching socket to port 8080
     if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) < 0) {
         perror("bind failed");
         exit(EXIT_FAILURE);
