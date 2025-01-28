@@ -51,42 +51,77 @@ void setup() {
     root.children = &newNode;
 }
 
-// TODO: actually make this work
-void register_node(node* root, node* newNode) {
-    char* newRoute = newNode->val;
-    char* message = newNode->val;
-    node* newRoot = root;
-    while(strlen(message) != 0) {
-        message++;
-        int len = 0;
-        while(message[len] != '\0' && message[len] != '/') {
-            len++;
-        }
-        char newString[len];
-        strncpy(newString, message, len);
+// TODO: use strtok
+/*void parse_uri(node* newNode) {*/
+/*    char* message = newNode->val;*/
+/*    while(strlen(message) != 0) {*/
+/*        message++;*/
+/*        int len = 0;*/
+/*        while(message[len] != '\0' && message[len] != '/') {*/
+/*            len++;*/
+/*        }*/
+/*        char newString[len];*/
+/*        strncpy(newString, message, len);*/
+/**/
+/*        printf("message: %s\n", newString);*/
+/*        node* foundRoot = find_node_by_val(newRoot, newString);*/
+/*        if(foundRoot != NULL) {*/
+/*            newRoot = foundRoot;*/
+/*        } else {*/
+/*            // create the nodes/children*/
+/**/
+/*            printf("%s\n", newString);*/
+/*        }*/
+/**/
+/*        memset(newString, 0, len);*/
+/*        message += len;*/
+/*    }*/
+/*}*/
 
-        printf("message: %s\n", newString);
-        node* foundRoot = find_node_by_val(newRoot, newString);
+/**
+ * @brief given a tree, and an uri, return the node the new uri will attach to.
+ */
+void getAttachingNode() {
+
+}
+
+// TODO: actually make this work
+void register_node(node* root, char route[]) {
+    char* tok = strtok(route, "/");
+    node* newRoot = root;
+    while(tok != NULL) {
+        node* foundRoot = find_node_by_val(newRoot, tok);
         if(foundRoot != NULL) {
             newRoot = foundRoot;
         } else {
-            strncpy(newRoute, message, len);
-            printf("%s\n", newString);
+            if(newRoot->children != NULL) {
+                newRoot = newRoot->children;
+                while(newRoot->siblings != NULL) {
+                    newRoot = newRoot->siblings;
+                }
+            }
+            while(tok != NULL) {
+                node* createdNode = malloc(sizeof(node));
+                createdNode->val = tok;
+                newRoot->children = createdNode;
+                newRoot = newRoot->children;
+                tok = strtok(NULL, "/");
+            }
         }
-
-        memset(newString, 0, len);
-        message += len;
+        tok = strtok(NULL, "/");
     }
 }
 
-void register_route(char* route, void (*callback)()) {
+// METHOD URI
+// GET /some/silly/endpoint
+void register_route(char route[], void (*callback)()) {
     node* newNode = malloc(sizeof(node));
     while(route[0] != '/') {
         route++;
     }
     newNode->val = route;
     newNode->callback = callback;
-    register_node(&root, newNode);
+    register_node(&root, route);
 }
 
 /**
@@ -95,11 +130,10 @@ void register_route(char* route, void (*callback)()) {
  */
 void print_tree(node* n) {
     printf("%s\n", n->val);
-    n->callback();
-    printf("\n");
     if(n->children != NULL) {
         print_tree(n->children);
-    } else if(n->siblings != NULL) {
+    }
+    if(n->siblings != NULL) {
         print_tree(n->siblings);
     }
 }
@@ -127,6 +161,9 @@ void print_each_entry(char* message) {
 int main(int argc, char const* argv[]) {
     setup();
     register_route("GET /test/something", &test_callback);
+    node* rootPtr = &root;
+    printf("%s\n", rootPtr->children->children->val);
+    print_tree(&root);
 
     return 0;
 }
