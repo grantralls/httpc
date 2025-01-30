@@ -36,6 +36,10 @@ node* find_node_by_val(node* root, char* val) {
     return NULL;
 }
 
+/**
+ * Given a route, split that route into a tree path, deliminated by "/".
+ * Walk the tree as far as possible and return the last found node
+ */
 node* find_leaf_node_by_route(char route[]) {
     char copiedRoute[strlen(route)];
     strcpy(copiedRoute, route);
@@ -67,9 +71,9 @@ void new_node_callback() {
 void setup() {
     root.val = "root";
     root.callback = &root_callback;
-    newNode.val = "test";
-    newNode.callback = &new_node_callback;
-    root.children = &newNode;
+    /*newNode.val = "test";*/
+    /*newNode.callback = &new_node_callback;*/
+    /*root.children = &newNode;*/
 }
 
 /**
@@ -89,38 +93,32 @@ void register_route(char route[]) {
 
     // I need to know where the find_leaf ended on
     char* tok = strtok(route, "/");
-    while(!strcmp(tok, newRoot->val)) {
+    while(strcmp(tok, newRoot->val) != 0) {
         tok = strtok(NULL, "/");
     }
-    strtok(NULL, "/");
+
+    if(strtok(NULL, "/") == NULL) {
+        printf("The given route already has a path: %s\n", route);
+        exit(-1);
+    }
 
     if(newRoot->children != NULL) {
-        newRoot = newRoot->children;
-        while(newRoot->siblings != NULL) {
-            newRoot = newRoot->siblings;
-        }
+        node* temp = newRoot->children;
 
         node* createdNode = malloc(sizeof(node));
         createdNode->val = tok;
-        newRoot->siblings = createdNode;
-        newRoot = newRoot->siblings;
+        createdNode->siblings = temp;
+        newRoot->children = createdNode;
+        newRoot = createdNode;
         tok = strtok(NULL, "/");
+    }
 
-        while(tok != NULL) {
-            node* createdNode = malloc(sizeof(node));
-            createdNode->val = tok;
-            newRoot->children = createdNode;
-            newRoot = newRoot->children;
-            tok = strtok(NULL, "/");
-        }
-    } else {
-        while(tok != NULL) {
-            node* createdNode = malloc(sizeof(node));
-            createdNode->val = tok;
-            newRoot->children = createdNode;
-            newRoot = newRoot->children;
-            tok = strtok(NULL, "/");
-        }
+    while(tok != NULL) {
+        node* createdNode = malloc(sizeof(node));
+        createdNode->val = tok;
+        newRoot->children = createdNode;
+        newRoot = newRoot->children;
+        tok = strtok(NULL, "/");
     }
 }
 
@@ -159,8 +157,8 @@ void print_each_entry(char* message) {
 
 int main(int argc, char const* argv[]) {
     setup();
-    char route1[] = "GET /test/something";
-    char route2[] = "GET /test/else";
+    char route1[] = "GET /root/test/something";
+    char route2[] = "GET /root/test/else";
     register_route(route1);
     register_route(route2);
     node* rootPtr = &root;
