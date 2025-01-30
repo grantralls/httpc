@@ -15,7 +15,6 @@ typedef struct node {
 } node;
 
 node root = {};
-node newNode = {};
 
 /**
 * @brief Searches the tree in a DFS manner to find the node with the val
@@ -61,30 +60,18 @@ node* find_leaf_node_by_route(char route[]) {
 
 
 void root_callback() {
-    printf("Send 200");
-}
-
-void new_node_callback() {
-
+    printf("Send 200\n");
 }
 
 void setup() {
     root.val = "root";
     root.callback = &root_callback;
-    /*newNode.val = "test";*/
-    /*newNode.callback = &new_node_callback;*/
-    /*root.children = &newNode;*/
 }
 
 /**
- * @brief given a tree, and an uri, return the node the new uri will attach to.
+ * @brief given a route, add it to the uri tree
  */
-void getAttachingNode() {
-
-}
-
-// TODO: actually make this work
-void register_route(char route[]) {
+void register_route(char route[], void (*callback)()) {
     // remove the verb
     while(route[0] != '/') {
         route++;
@@ -97,29 +84,31 @@ void register_route(char route[]) {
         tok = strtok(NULL, "/");
     }
 
-    if(strtok(NULL, "/") == NULL) {
+    if((tok = strtok(NULL, "/")) == NULL) {
         printf("The given route already has a path: %s\n", route);
         exit(-1);
     }
 
+    node* leafNode;
     if(newRoot->children != NULL) {
         node* temp = newRoot->children;
-
-        node* createdNode = malloc(sizeof(node));
-        createdNode->val = tok;
-        createdNode->siblings = temp;
-        newRoot->children = createdNode;
-        newRoot = createdNode;
+        leafNode = malloc(sizeof(node));
+        leafNode->val = tok;
+        leafNode->siblings = temp;
+        newRoot->children = leafNode;
+        newRoot = leafNode;
         tok = strtok(NULL, "/");
     }
 
     while(tok != NULL) {
-        node* createdNode = malloc(sizeof(node));
-        createdNode->val = tok;
-        newRoot->children = createdNode;
+        leafNode = malloc(sizeof(node));
+        leafNode->val = tok;
+        newRoot->children = leafNode;
         newRoot = newRoot->children;
         tok = strtok(NULL, "/");
     }
+
+    leafNode->callback = callback;
 }
 
 /**
@@ -128,17 +117,15 @@ void register_route(char route[]) {
  */
 void print_tree(node* n) {
     printf("%s\n", n->val);
+    if(n->callback != NULL) {
+        n->callback();
+    }
     if(n->children != NULL) {
         print_tree(n->children);
     }
     if(n->siblings != NULL) {
         print_tree(n->siblings);
     }
-}
-
-
-void test_callback() {
-    printf("Test callback");
 }
 
 // "/some/uri/resource"
@@ -155,12 +142,20 @@ void print_each_entry(char* message) {
     }
 }
 
+void test_callback_1() {
+    printf("HELLO THERE!\n");
+}
+
+void test_callback_2() {
+    printf("HELLO THERE AGAIN!\n");
+}
+
 int main(int argc, char const* argv[]) {
     setup();
     char route1[] = "GET /root/test/something";
     char route2[] = "GET /root/test/else";
-    register_route(route1);
-    register_route(route2);
+    register_route(route1, *test_callback_1);
+    register_route(route2, *test_callback_2);
     node* rootPtr = &root;
     print_tree(&root);
 
