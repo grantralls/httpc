@@ -6,7 +6,6 @@
 #include <unistd.h>
 #define PORT 8080
 
-
 typedef struct node {
     char* val;
     struct node* children;
@@ -92,9 +91,14 @@ void register_route(char route[], void (*callback)()) {
     tok = strtok(NULL, "/");
 
     if(tok == NULL) {
-        // there exists no token that doesn't already exist in the tree
-        printf("The given route already has a path: %s\n", route);
-        exit(-1);
+        if(targetNode->callback != NULL) {
+            // there exists no token that doesn't already exist in the tree
+            printf("The given route already has a path: %s\n", route);
+            exit(-1);
+        } else {
+            targetNode->callback = callback;
+            return;
+        }
     }
 
     // keep a pointer to the last created node so I can attach the callback
@@ -106,6 +110,7 @@ void register_route(char route[], void (*callback)()) {
         leafNode->siblings = temp;
         leafNode->children = NULL;
         targetNode->children = leafNode;
+        targetNode->callback = NULL;
         targetNode = leafNode;
         tok = strtok(NULL, "/");
     }
@@ -115,6 +120,7 @@ void register_route(char route[], void (*callback)()) {
         leafNode->val = tok;
         leafNode->siblings = NULL;
         leafNode->children = NULL;
+        leafNode->callback = NULL;
         targetNode->children = leafNode;
         targetNode = targetNode->children;
         tok = strtok(NULL, "/");
@@ -179,14 +185,10 @@ void test_callback_2() {
 
 int main(int argc, char const* argv[]) {
     setup();
-    char route1[] = "GET /root/test/something";
-    char route3[] = "GET /root/test/something/something_else";
-    char route2[] = "GET /root/test/else";
-    char route4[] = "GET /root/test/else/else_something";
-    register_route(route1, *test_callback_1);
+    char route2[] = "GET /root/test/something/something_else";
+    char route3[] = "GET /root/test/something";
     register_route(route2, *test_callback_2);
     register_route(route3, *test_callback_2);
-    register_route(route4, *test_callback_2);
     destroy_tree(&root);
 
     return 0;
