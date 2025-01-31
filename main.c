@@ -69,7 +69,6 @@ void setup() {
     root.children = NULL;
 }
 
-// TODO: If I create a route /some/silly/route then another one of /some/silly, this explodes
 /**
  * @brief given a route, add it to the uri tree
  */
@@ -81,14 +80,19 @@ void register_route(char route[], void (*callback)()) {
     // get the node I am going to attach to
     node* targetNode = find_leaf_node_by_route(route);
 
-    // update the token until it is the same as targetNode's token
     char* tok = strtok(route, "/");
-    while(strcmp(tok, targetNode->val) != 0) {
+    if(strcmp(targetNode->val, "root") != 0) {
+        // update the token until it is the same as targetNode's token
+        while(strcmp(tok, targetNode->val) != 0) {
+            tok = strtok(NULL, "/");
+        }
+
+        // get the first token that doesn't exist in the tree
         tok = strtok(NULL, "/");
+    } else {
+        targetNode = &root;
     }
 
-    // get the first token that doesn't exist in the tree
-    tok = strtok(NULL, "/");
 
     if(tok == NULL) {
         if(targetNode->callback != NULL) {
@@ -150,9 +154,6 @@ void destroy_tree(node* n) {
  */
 void print_tree(node* n) {
     printf("%s\n", n->val);
-    if(n->callback != NULL) {
-        n->callback();
-    }
     if(n->children != NULL) {
         print_tree(n->children);
     }
@@ -185,8 +186,8 @@ void test_callback_2() {
 
 int main(int argc, char const* argv[]) {
     setup();
-    char route2[] = "GET /root/test/something/something_else";
-    char route3[] = "GET /root/test/something";
+    char route2[] = "GET /test/something/something_else";
+    char route3[] = "GET /test/something";
     register_route(route2, *test_callback_2);
     register_route(route3, *test_callback_2);
     destroy_tree(&root);

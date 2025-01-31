@@ -6,5 +6,6 @@ valgrind-check: httpc
 	valgrind --leak-check=yes --track-origins=yes ./httpc
 clean:
 	rm httpc main.o
+	rm -rf ./docs
 docs:
 	doxygen Doxyfile
