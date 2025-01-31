@@ -14,7 +14,7 @@ typedef struct node {
     void (*callback)();
 } node;
 
-node root = {};
+node root;
 
 /**
 * @brief Searches the tree in a DFS manner to find the node with the val
@@ -66,8 +66,11 @@ void root_callback() {
 void setup() {
     root.val = "root";
     root.callback = &root_callback;
+    root.siblings = NULL;
+    root.children = NULL;
 }
 
+// TODO: If I create a route /some/silly/route then another one of /some/silly, this explodes
 /**
  * @brief given a route, add it to the uri tree
  */
@@ -76,39 +79,63 @@ void register_route(char route[], void (*callback)()) {
     while(route[0] != '/') {
         route++;
     }
-    node* newRoot = find_leaf_node_by_route(route);
+    // get the node I am going to attach to
+    node* targetNode = find_leaf_node_by_route(route);
 
-    // I need to know where the find_leaf ended on
+    // update the token until it is the same as targetNode's token
     char* tok = strtok(route, "/");
-    while(strcmp(tok, newRoot->val) != 0) {
+    while(strcmp(tok, targetNode->val) != 0) {
         tok = strtok(NULL, "/");
     }
 
-    if((tok = strtok(NULL, "/")) == NULL) {
+    // get the first token that doesn't exist in the tree
+    tok = strtok(NULL, "/");
+
+    if(tok == NULL) {
+        // there exists no token that doesn't already exist in the tree
         printf("The given route already has a path: %s\n", route);
         exit(-1);
     }
 
+    // keep a pointer to the last created node so I can attach the callback
     node* leafNode;
-    if(newRoot->children != NULL) {
-        node* temp = newRoot->children;
+    if(targetNode->children != NULL) {
+        node* temp = targetNode->children;
         leafNode = malloc(sizeof(node));
         leafNode->val = tok;
         leafNode->siblings = temp;
-        newRoot->children = leafNode;
-        newRoot = leafNode;
+        leafNode->children = NULL;
+        targetNode->children = leafNode;
+        targetNode = leafNode;
         tok = strtok(NULL, "/");
     }
 
     while(tok != NULL) {
         leafNode = malloc(sizeof(node));
         leafNode->val = tok;
-        newRoot->children = leafNode;
-        newRoot = newRoot->children;
+        leafNode->siblings = NULL;
+        leafNode->children = NULL;
+        targetNode->children = leafNode;
+        targetNode = targetNode->children;
         tok = strtok(NULL, "/");
     }
 
     leafNode->callback = callback;
+}
+
+void destroy_tree(node* n) {
+    if(n->children != NULL) {
+        destroy_tree(n->children);
+    }
+    if(n->siblings != NULL) {
+        destroy_tree(n->siblings);
+    }
+    if(n->siblings != NULL) {
+        free(n->siblings);
+    }
+    if(n->children != NULL) {
+        free(n->children);
+    }
 }
 
 /**
@@ -153,11 +180,14 @@ void test_callback_2() {
 int main(int argc, char const* argv[]) {
     setup();
     char route1[] = "GET /root/test/something";
+    char route3[] = "GET /root/test/something/something_else";
     char route2[] = "GET /root/test/else";
+    char route4[] = "GET /root/test/else/else_something";
     register_route(route1, *test_callback_1);
     register_route(route2, *test_callback_2);
-    node* rootPtr = &root;
-    print_tree(&root);
+    register_route(route3, *test_callback_2);
+    register_route(route4, *test_callback_2);
+    destroy_tree(&root);
 
     return 0;
 }
