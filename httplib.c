@@ -22,6 +22,16 @@ node* find_node_by_val(node* n, char* val) {
     return NULL;
 }
 
+//TODO: rename this
+// 0 when false, 1 when true
+node* find_tok(char val[], node* n) {
+    while(n != NULL && strcmp(val, n->val) != 0) {
+        n = n->siblings;
+    }
+
+    return n;
+}
+
 node* find_leaf_node_by_route(char route[]) {
     char copiedRoute[strlen(route)];
     strcpy(copiedRoute, route);
@@ -29,7 +39,7 @@ node* find_leaf_node_by_route(char route[]) {
     node* ptr = &root;
 
     while(tok != NULL) {
-        node* newPtr = find_node_by_val(ptr, tok);
+        node* newPtr = find_tok(tok, ptr->children);
         if(newPtr != NULL) {
             ptr = newPtr;
         } else {
@@ -41,18 +51,18 @@ node* find_leaf_node_by_route(char route[]) {
     return ptr;
 }
 
-void root_callback() {
+void root_callback(void) {
     printf("Send 200\n");
 }
 
-void setup() {
+void setup(void) {
     root.val = "root";
     root.callback = &root_callback;
     root.siblings = NULL;
     root.children = NULL;
 }
 
-void register_route(char route[], void (*callback)()) {
+void register_route(char route[], callback_t callback) {
     // remove the verb
     while(route[0] != '/') {
         route++;
@@ -128,17 +138,17 @@ void destroy_tree(node* n) {
     }
 }
 
-void print_tree(node* n) {
-    printf("%s\n", n->val);
+void print_tree(node* n, int level) {
+    printf("Level: %d val: %s\n", level, n->val);
     if(n->children != NULL) {
-        print_tree(n->children);
+        print_tree(n->children, level + 1);
     }
     if(n->siblings != NULL) {
-        print_tree(n->siblings);
+        print_tree(n->siblings, level);
     }
 }
 
-int create_server() {
+int create_server(void) {
     int server_fd, new_socket, valread;
     struct sockaddr_in address;
     int opt = 1; 

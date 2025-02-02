@@ -1,11 +1,14 @@
 #include "httplib.h"
 #include <stdio.h>
 
-void test_callback_1() {
+void test_callback_1(void);
+void test_callback_2(void);
+
+void test_callback_1(void) {
     printf("HELLO THERE!\n");
 }
 
-void test_callback_2() {
+void test_callback_2(void) {
     printf("HELLO THERE AGAIN!\n");
 }
 

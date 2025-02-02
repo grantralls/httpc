@@ -81,8 +81,11 @@ void test_should_handle_duplicate_segments() {
     assert(!strcmp(root.children->children->val, "first"));
     assert(!strcmp(root.children->siblings->val, "first"));
     assert(!strcmp(root.children->siblings->children->val, "second"));
-
 }
+
+// /some/url/over/here
+
+// /some/over/here/url
 
 int main() {
     test_uri_with_existing_node();
