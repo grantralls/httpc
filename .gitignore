@@ -1,6 +1,7 @@
 # Custom
 ./test
 docs/
+./httpc
 
 # Prerequisites
 *.d
