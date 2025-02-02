@@ -18,7 +18,7 @@ int main(int argc, char const* argv[]) {
     char route3[] = "GET /test/something";
     register_route(route2, *test_callback_1);
     register_route(route3, *test_callback_2);
-    print_tree(&root);
+    print_tree(&root, 0);
     destroy_tree(&root);
 
     return 0;
