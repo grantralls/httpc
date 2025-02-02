@@ -34,7 +34,7 @@ node* find_leaf_node_by_route(char route[]);
  * @param route an HTTP verb with a route, separated by a space. (eg. "GET /some/complete/route")
  * @param callback the function to be ran when a request comes in for the given route
  */
-void register_route(char route[], callback_t callback);
+int register_route(char route[], callback_t callback);
 /**
  * @brief Given a root node, deallocate the entire tree
  */

@@ -62,7 +62,13 @@ void setup(void) {
     root.children = NULL;
 }
 
-void register_route(char route[], callback_t callback) {
+enum ERROR_CODES { RR_DUPLICATE_ROUTE, RR_OK };
+
+/**
+ * TODO: make this actually reference error codes
+ * @return ERROR_CODES
+ */
+int register_route(char route[], callback_t callback) {
     // remove the verb
     while(route[0] != '/') {
         route++;
@@ -87,16 +93,15 @@ void register_route(char route[], callback_t callback) {
     if(tok == NULL) {
         if(targetNode->callback != NULL) {
             // there exists no token that doesn't already exist in the tree
-            printf("The given route already has a path: %s\n", route);
-            exit(-1);
+            return RR_DUPLICATE_ROUTE;
         } else {
             targetNode->callback = callback;
-            return;
+            return RR_OK;
         }
     }
 
     // keep a pointer to the last created node so I can attach the callback
-    node* leafNode;
+    node* leafNode = NULL;
     if(targetNode->children != NULL) {
         node* temp = targetNode->children;
         leafNode = malloc(sizeof(node));
@@ -121,6 +126,7 @@ void register_route(char route[], callback_t callback) {
     }
 
     leafNode->callback = callback;
+    return RR_OK;
 }
 
 void destroy_tree(node* n) {
@@ -149,7 +155,7 @@ void print_tree(node* n, int level) {
 }
 
 int create_server(void) {
-    int server_fd, new_socket, valread;
+    int server_fd, new_socket;
     struct sockaddr_in address;
     int opt = 1; 
     int addrlen = sizeof(address);
@@ -181,7 +187,7 @@ int create_server(void) {
         perror("accept");
         exit(EXIT_FAILURE);
     }
-    valread = read(new_socket, buffer, 1024);
+    /*valread = read(new_socket, buffer, 1024);*/
     printf("%s\n", buffer);
     send(new_socket, hello, strlen(hello), 0);
     printf("Hello message sent\n");
