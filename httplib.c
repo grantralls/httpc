@@ -22,8 +22,6 @@ node* find_node_by_val(node* n, char* val) {
     return NULL;
 }
 
-//TODO: rename this
-// 0 when false, 1 when true
 node* find_tok(char val[], node* n) {
     while(n != NULL && strcmp(val, n->val) != 0) {
         n = n->siblings;
@@ -32,7 +30,7 @@ node* find_tok(char val[], node* n) {
     return n;
 }
 
-node* find_leaf_node_by_route(char route[]) {
+node* trace_tree(char route[]) {
     char copiedRoute[strlen(route)];
     strcpy(copiedRoute, route);
     char* tok = strtok(copiedRoute, "/");
@@ -45,6 +43,25 @@ node* find_leaf_node_by_route(char route[]) {
         } else {
             break;
         }
+        tok = strtok(NULL, "/");
+    }
+
+    return ptr;
+}
+
+// TODO: Structure this a little better, it's just a modified copy of trace_tree
+node* trace_tree_exact(char route[]) {
+    char copiedRoute[strlen(route)];
+    strcpy(copiedRoute, route);
+    char* tok = strtok(copiedRoute, "/");
+    node* ptr = &root;
+
+    while(tok != NULL) {
+        node* newPtr = find_tok(tok, ptr->children);
+        if(newPtr == NULL) {
+            return NULL;
+        }
+        ptr = newPtr;
         tok = strtok(NULL, "/");
     }
 
@@ -74,7 +91,7 @@ int register_route(char route[], callback_t callback) {
         route++;
     }
     // get the node I am going to attach to
-    node* targetNode = find_leaf_node_by_route(route);
+    node* targetNode = trace_tree(route);
 
     char* tok = strtok(route, "/");
     if(strcmp(targetNode->val, "root") != 0) {
@@ -167,7 +184,7 @@ int create_server(void) {
         exit(EXIT_FAILURE);
     }
 
-    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt))) {
+    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))) {
         perror("setsockopt");
         exit(EXIT_FAILURE);
     }

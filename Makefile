@@ -1,5 +1,5 @@
-CC=gcc-14
-CFLAGS=-D_GNU_SOURCE -std=c17 -pedantic-errors -Wall -Wextra
+CC=gcc
+CFLAGS=-std=c17 -pedantic-errors -Wall -Wextra
 
 httpc: main.o httplib.o
 	$(CC) -o httpc main.o httplib.o

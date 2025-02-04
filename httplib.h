@@ -25,10 +25,15 @@ extern node root;
  */
 node* find_node_by_val(node* n, char* val);
 /**
- * @brief gets the leaf-most node given some route
- * @param route a complete route (eg. /some/complete/route)
+ * Given a route, trace the URI tree and return the last found tree node that exists within the route.
+ * If no node exists in the tree (the route is new to the tree), return root. 
+ *
  */
-node* find_leaf_node_by_route(char route[]);
+node* trace_tree(char route[]);
+/**
+ * returns the node of the last segment in the URI. If a perfect trace isn't found, return null.
+ */
+node* trace_tree_exact(char route[]);
 /**
  * @brief adds a route to the URI tree
  * @param route an HTTP verb with a route, separated by a space. (eg. "GET /some/complete/route")
@@ -43,6 +48,7 @@ void destroy_tree(node* n);
  * @brief Given a root node, print the entire tree in a DFS manner.
  */
 void print_tree(node* n, int level);
+
 
 /**
  * TODO: Create the server

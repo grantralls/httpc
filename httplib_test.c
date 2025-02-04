@@ -22,7 +22,6 @@ void test_uri_with_existing_node() {
 
     // Act
     register_route(route1, *test_callback_1);
-    // the node for "something" already exists, but a callback has not been defined for it
     register_route(route2, *test_callback_2);
 
     // Assert
@@ -83,11 +82,37 @@ void test_should_handle_duplicate_segments() {
     assert(!strcmp(root.children->siblings->children->val, "second"));
 }
 
+void test_trace_tree() {
+    // Arrange
+    destroy_tree(&root);
+    setup();
+    char route1[] = "GET /parent/onechild";
+    char route2[] = "GET /parent/child/otherchild";
+
+    // Act
+    register_route(route1, empty_callback);
+    register_route(route2, empty_callback);
+
+    // Assert
+    char uniqueRoute[] = "/a/unique/route";
+    char partiallyUniqueRoute[] = "/parent/onechild/unique";
+    char perfectMatch[] = "/parent/onechild";
+    char perfectMatchAgain[] = "/parent/child/otherchild";
+    assert(!strcmp(trace_tree(uniqueRoute)->val, "root"));
+    assert(!strcmp(trace_tree(partiallyUniqueRoute)->val, "onechild"));
+    assert(!strcmp(trace_tree(perfectMatch)->val, "onechild"));
+    assert(!strcmp(trace_tree(perfectMatchAgain)->val, "otherchild"));
+    assert(!strcmp(trace_tree_exact(perfectMatch)->val, "onechild"));
+    assert(trace_tree_exact(uniqueRoute) == NULL);
+}
+
+
 int main() {
     test_uri_with_existing_node();
     test_should_properly_attach_to_children();
     test_should_properly_attach_to_children_with_siblings();
     test_should_handle_duplicate_segments();
+    test_trace_tree();
 
     printf("Tests passed!\n");
     return -1;
