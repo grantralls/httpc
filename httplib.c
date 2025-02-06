@@ -171,6 +171,26 @@ void print_tree(node* n, int level) {
     }
 }
 
+/**
+ * @return the number of bytes written
+*/
+int get_route_from_request(char request[], char buffer[], int buf_size) {
+    char* start = request;
+    int length = 1;
+    while(*start != '/') {
+        start++;
+    }
+    while(*(start + length) != ' ') {
+        length++;
+    }
+    if(buf_size > length + 1) {
+        strncpy(buffer, start, length);
+        buffer[buf_size - 1] = '\0';
+        return length;
+    }
+    return 0;
+}
+
 int create_server(void) {
     int server_fd, new_socket;
     struct sockaddr_in address;
@@ -204,8 +224,12 @@ int create_server(void) {
         perror("accept");
         exit(EXIT_FAILURE);
     }
-    /*valread = read(new_socket, buffer, 1024);*/
-    printf("%s\n", buffer);
+    read(new_socket, buffer, 1023);
+    char route[1024];
+    if(!get_route_from_request(buffer, route, 1024)) {
+        puts("oops");
+    }
+    printf("route: %s\n", route);
     send(new_socket, hello, strlen(hello), 0);
     printf("Hello message sent\n");
 

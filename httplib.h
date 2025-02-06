@@ -48,8 +48,6 @@ void destroy_tree(node* n);
  * @brief Given a root node, print the entire tree in a DFS manner.
  */
 void print_tree(node* n, int level);
-
-
 /**
  * TODO: Create the server
  */
