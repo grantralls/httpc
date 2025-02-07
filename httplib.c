@@ -191,6 +191,16 @@ int get_route_from_request(char request[], char buffer[], int buf_size) {
     return 0;
 }
 
+void create_request(char request_buffer[]) {
+    char* line = strtok(request_buffer, "\r\n");
+    char* verb = strtok(line, " ");
+    printf("verb: %s\n", verb);
+
+    while((line = strtok(NULL, "\r\n")) != NULL) {
+        printf("line: %s\n", line);
+    }
+}
+
 int create_server(void) {
     int server_fd, new_socket;
     struct sockaddr_in address;
@@ -225,11 +235,12 @@ int create_server(void) {
         exit(EXIT_FAILURE);
     }
     read(new_socket, buffer, 1023);
-    char route[1024];
-    if(!get_route_from_request(buffer, route, 1024)) {
-        puts("oops");
-    }
-    printf("route: %s\n", route);
+
+    /*request req;*/
+    /*req.method = GET;*/
+    /*req.headers = NULL;*/
+    create_request(buffer);
+
     send(new_socket, hello, strlen(hello), 0);
     printf("Hello message sent\n");
 

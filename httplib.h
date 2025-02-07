@@ -2,6 +2,13 @@
 
 typedef void (*callback_t)(void);
 
+typedef enum methods { GET, POST, HEAD } methods;
+typedef struct request {
+    methods method;
+    // TODO: this type will likely change
+    char* headers;
+} request;
+
 /**
  * URIs are represented as a n-ary tree of nodes. Where the val in each node is a URI .
  */
