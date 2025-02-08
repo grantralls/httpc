@@ -30,26 +30,31 @@ node* find_tok(char val[], node* n) {
     return n;
 }
 
+/**
+ * Given a route, this function will traverse the tree in a DFS manner, using the route as a guide. As the tree is traversed, currNode is updated to be the most recently found node. When a new currNode is unable to be found, or we've reach the end of the route, return currNode.
+ */
 node* trace_tree(char route[]) {
     char copiedRoute[strlen(route)];
     strcpy(copiedRoute, route);
     char* tok = strtok(copiedRoute, "/");
-    node* ptr = &root;
+    node* currNode = &root;
 
     while(tok != NULL) {
-        node* newPtr = find_tok(tok, ptr->children);
-        if(newPtr != NULL) {
-            ptr = newPtr;
+        node* newCurrNode = find_tok(tok, currNode->children);
+        if(newCurrNode != NULL) {
+            currNode = newCurrNode;
         } else {
             break;
         }
         tok = strtok(NULL, "/");
     }
 
-    return ptr;
+    return currNode;
 }
 
-// TODO: Structure this a little better, it's just a modified copy of trace_tree
+/**
+ * This is very similar to @ref trace_tree. The key difference is, a node is only returned when the entire route was able to be traced on the tree. This will typically be used for, finding the handling node for an incoming request. 
+ */
 node* trace_tree_exact(char route[]) {
     char copiedRoute[strlen(route)];
     strcpy(copiedRoute, route);
@@ -81,10 +86,6 @@ void setup(void) {
 
 enum ERROR_CODES { RR_DUPLICATE_ROUTE, RR_OK };
 
-/**
- * TODO: make this actually reference error codes
- * @return ERROR_CODES
- */
 int register_route(char route[], callback_t callback) {
     // remove the verb
     while(route[0] != '/') {
@@ -169,26 +170,6 @@ void print_tree(node* n, int level) {
     if(n->siblings != NULL) {
         print_tree(n->siblings, level);
     }
-}
-
-/**
- * @return the number of bytes written
-*/
-int get_route_from_request(char request[], char buffer[], int buf_size) {
-    char* start = request;
-    int length = 1;
-    while(*start != '/') {
-        start++;
-    }
-    while(*(start + length) != ' ') {
-        length++;
-    }
-    if(buf_size > length + 1) {
-        strncpy(buffer, start, length);
-        buffer[buf_size - 1] = '\0';
-        return length;
-    }
-    return 0;
 }
 
 void create_request(char request_buffer[]) {

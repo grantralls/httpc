@@ -1,7 +1,12 @@
 #ifndef HTTP_LIB
 
+/**
+ * @file httplib.h
+ */
+
 typedef void (*callback_t)(void);
 
+enum ERROR_CODES { RR_DUPLICATE_ROUTE, RR_OK };
 typedef enum methods { GET, POST, HEAD } methods;
 typedef struct request {
     methods method;
@@ -10,7 +15,7 @@ typedef struct request {
 } request;
 
 /**
- * URIs are represented as a n-ary tree of nodes. Where the val in each node is a URI .
+ * If we imagine A single URI is a linked list of nodes, then every registered URI on the server is an N-ary tree of nodes. This N-ary tree is how I've implemented URIs in this library.
  */
 typedef struct node {
     /// a URI [fsegment](https://www.rfc-editor.org/rfc/rfc1945#section-3.2.1)
@@ -32,19 +37,19 @@ extern node root;
  */
 node* find_node_by_val(node* n, char* val);
 /**
- * Given a route, trace the URI tree and return the last found tree node that exists within the route.
- * If no node exists in the tree (the route is new to the tree), return root. 
- *
+ * @brief given a route, return the deepest node that exists in the tree that satisfies the route
+ * @param route the full route that you wish to find in the tree
  */
 node* trace_tree(char route[]);
 /**
- * returns the node of the last segment in the URI. If a perfect trace isn't found, return null.
+ * @brief returns the node of the last segment in the URI. If a complete trace isn't found, return null.
  */
 node* trace_tree_exact(char route[]);
 /**
  * @brief adds a route to the URI tree
  * @param route an HTTP verb with a route, separated by a space. (eg. "GET /some/complete/route")
  * @param callback the function to be ran when a request comes in for the given route
+ * @return one of @ref ERROR_CODES
  */
 int register_route(char route[], callback_t callback);
 /**
@@ -59,7 +64,9 @@ void print_tree(node* n, int level);
  * TODO: Create the server
  */
 int create_server(void);
-
+/**
+ * @brief this needs to be ran before registering any routes.
+ */
 void setup(void);
 
 #endif
