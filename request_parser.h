@@ -6,6 +6,7 @@
 
 #define HTTPLIB_REQUEST_PARSER
 #include <stddef.h>
+#include "httplib.h"
 /**
  * @brief parse a route from a request
  * @param request the request line of the HTTP request
@@ -14,4 +15,5 @@
  * @return number of bytes written. 0 if the route is bigger than the buffer
  */
 int parse_route_from_request(char request[], char buffer[], size_t buf_size);
+void create_request(char request_buffer[], request* req);
 #endif

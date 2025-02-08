@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include "httplib.h"
+#include "request_parser.h"
 #define PORT 8080
 
 node root;
@@ -83,8 +84,6 @@ void setup(void) {
     root.siblings = NULL;
     root.children = NULL;
 }
-
-enum ERROR_CODES { RR_DUPLICATE_ROUTE, RR_OK };
 
 int register_route(char route[], callback_t callback) {
     // remove the verb
@@ -172,15 +171,6 @@ void print_tree(node* n, int level) {
     }
 }
 
-void create_request(char request_buffer[]) {
-    char* line = strtok(request_buffer, "\r\n");
-    char* verb = strtok(line, " ");
-    printf("verb: %s\n", verb);
-
-    while((line = strtok(NULL, "\r\n")) != NULL) {
-        printf("line: %s\n", line);
-    }
-}
 
 int create_server(void) {
     int server_fd, new_socket;
@@ -217,10 +207,12 @@ int create_server(void) {
     }
     read(new_socket, buffer, 1023);
 
-    /*request req;*/
-    /*req.method = GET;*/
-    /*req.headers = NULL;*/
-    create_request(buffer);
+    request req;
+    req.method = GET;
+    req.uri = NULL;
+    req.headers = NULL;
+    create_request(buffer, &req);
+    printf("uri: %s\n", req.uri);
 
     send(new_socket, hello, strlen(hello), 0);
     printf("Hello message sent\n");

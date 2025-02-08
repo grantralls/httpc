@@ -1,4 +1,5 @@
 #ifndef HTTP_LIB
+#define HTTP_LIB
 
 /**
  * @file httplib.h
@@ -8,10 +9,15 @@ typedef void (*callback_t)(void);
 
 enum ERROR_CODES { RR_DUPLICATE_ROUTE, RR_OK };
 typedef enum methods { GET, POST, HEAD } methods;
+typedef struct header {
+    char* key;
+    char* value;
+    struct header* next;
+} header;
 typedef struct request {
     methods method;
-    // TODO: this type will likely change
-    char* headers;
+    char* uri;
+    struct header* headers;
 } request;
 
 /**

@@ -1,4 +1,5 @@
 #include "request_parser.h"
+#include <stdio.h>
 #include <string.h>
 
 /*
@@ -7,7 +8,7 @@
 */
 int parse_route_from_request(char request[], char buffer[], size_t buf_size) {
     char* start = request;
-    int length = 1;
+    size_t length = 1;
     while(*start != '/') {
         start++;
     }
@@ -21,3 +22,22 @@ int parse_route_from_request(char request[], char buffer[], size_t buf_size) {
     return 0;
 }
 
+void create_request(char request_buffer[], request* req) {
+    char* line = strtok(request_buffer, "\r\n");
+    char* request_line = line;
+    line = strtok(NULL, "\r\n");
+
+    // handle headers
+    while(line != NULL) {
+        printf("header: %s\n", line);
+        line = strtok(NULL, "\r\n");
+    }
+
+    req->uri = request_line;
+    // handle the request line
+    char* request_line_item = strtok(request_line, " ");
+    while(request_line_item != NULL) {
+        request_line_item = strtok(NULL, " ");
+    }
+
+}
