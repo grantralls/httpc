@@ -5,20 +5,10 @@
  * @file httplib.h
  */
 
-typedef void (*callback_t)(void);
+#include "request_parser.h"
+typedef void (*callback_t)(request);
 
 enum ERROR_CODES { RR_DUPLICATE_ROUTE, RR_OK };
-typedef enum methods { GET, POST, HEAD } methods;
-typedef struct header {
-    char* key;
-    char* value;
-    struct header* next;
-} header;
-typedef struct request {
-    methods method;
-    char* uri;
-    struct header* headers;
-} request;
 
 /**
  * If we imagine A single URI is a linked list of nodes, then every registered URI on the server is an N-ary tree of nodes. This N-ary tree is how I've implemented URIs in this library.

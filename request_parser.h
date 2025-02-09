@@ -6,7 +6,18 @@
 
 #define HTTPLIB_REQUEST_PARSER
 #include <stddef.h>
-#include "httplib.h"
+
+typedef struct header {
+    char* key;
+    char* value;
+    struct header* next;
+} header;
+typedef enum methods { GET, POST, HEAD } methods;
+typedef struct request {
+    char* uri;
+    struct header* headers;
+    methods method;
+} request;
 /**
  * @brief parse a route from a request
  * @param request the request line of the HTTP request

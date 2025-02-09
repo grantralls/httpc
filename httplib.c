@@ -74,8 +74,8 @@ node* trace_tree_exact(char route[]) {
     return ptr;
 }
 
-void root_callback(void) {
-    printf("Send 200\n");
+void root_callback(request req) {
+    printf("req uri: %s\n", req.uri);
 }
 
 void setup(void) {
@@ -208,11 +208,9 @@ int create_server(void) {
     read(new_socket, buffer, 1023);
 
     request req;
-    req.method = GET;
-    req.uri = NULL;
-    req.headers = NULL;
     create_request(buffer, &req);
-    printf("uri: %s\n", req.uri);
+    node* n = trace_tree_exact(req.uri);
+    n->callback(req);
 
     send(new_socket, hello, strlen(hello), 0);
     printf("Hello message sent\n");
