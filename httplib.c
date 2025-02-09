@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include "httplib.h"
+#include "request_parser.h"
 #define PORT 8080
 
 node root;
@@ -30,26 +31,31 @@ node* find_tok(char val[], node* n) {
     return n;
 }
 
+/**
+ * Given a route, this function will traverse the tree in a DFS manner, using the route as a guide. As the tree is traversed, currNode is updated to be the most recently found node. When a new currNode is unable to be found, or we've reach the end of the route, return currNode.
+ */
 node* trace_tree(char route[]) {
     char copiedRoute[strlen(route)];
     strcpy(copiedRoute, route);
     char* tok = strtok(copiedRoute, "/");
-    node* ptr = &root;
+    node* currNode = &root;
 
     while(tok != NULL) {
-        node* newPtr = find_tok(tok, ptr->children);
-        if(newPtr != NULL) {
-            ptr = newPtr;
+        node* newCurrNode = find_tok(tok, currNode->children);
+        if(newCurrNode != NULL) {
+            currNode = newCurrNode;
         } else {
             break;
         }
         tok = strtok(NULL, "/");
     }
 
-    return ptr;
+    return currNode;
 }
 
-// TODO: Structure this a little better, it's just a modified copy of trace_tree
+/**
+ * This is very similar to @ref trace_tree. The key difference is, a node is only returned when the entire route was able to be traced on the tree. This will typically be used for, finding the handling node for an incoming request. 
+ */
 node* trace_tree_exact(char route[]) {
     char copiedRoute[strlen(route)];
     strcpy(copiedRoute, route);
@@ -68,8 +74,8 @@ node* trace_tree_exact(char route[]) {
     return ptr;
 }
 
-void root_callback(void) {
-    printf("Send 200\n");
+void root_callback(request req) {
+    printf("req uri: %s\n", req.uri);
 }
 
 void setup(void) {
@@ -79,12 +85,6 @@ void setup(void) {
     root.children = NULL;
 }
 
-enum ERROR_CODES { RR_DUPLICATE_ROUTE, RR_OK };
-
-/**
- * TODO: make this actually reference error codes
- * @return ERROR_CODES
- */
 int register_route(char route[], callback_t callback) {
     // remove the verb
     while(route[0] != '/') {
@@ -171,6 +171,7 @@ void print_tree(node* n, int level) {
     }
 }
 
+
 int create_server(void) {
     int server_fd, new_socket;
     struct sockaddr_in address;
@@ -204,8 +205,13 @@ int create_server(void) {
         perror("accept");
         exit(EXIT_FAILURE);
     }
-    /*valread = read(new_socket, buffer, 1024);*/
-    printf("%s\n", buffer);
+    read(new_socket, buffer, 1023);
+
+    request req;
+    create_request(buffer, &req);
+    node* n = trace_tree_exact(req.uri);
+    n->callback(req);
+
     send(new_socket, hello, strlen(hello), 0);
     printf("Hello message sent\n");
 
