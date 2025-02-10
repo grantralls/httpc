@@ -2,6 +2,8 @@
 #include <stdio.h>
 
 void test_callback_1(request req) {
+    printf("header 1: %s\n", req.headers->next->key);
+    printf("header 1: %s\n", req.headers->next->value);
     printf("req uri: %s\n", req.uri);
 }
 

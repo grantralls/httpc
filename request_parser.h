@@ -5,17 +5,12 @@
  */
 
 #define HTTPLIB_REQUEST_PARSER
+#include "linkedlist.h"
 #include <stddef.h>
-
-typedef struct header {
-    char* key;
-    char* value;
-    struct header* next;
-} header;
 typedef enum methods { GET, POST, HEAD } methods;
 typedef struct request {
     char* uri;
-    struct header* headers;
+    struct ll_node* headers;
     methods method;
 } request;
 /**

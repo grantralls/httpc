@@ -1,6 +1,7 @@
 #include "request_parser.h"
-#include "httplib.h"
+#include "linkedlist.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 /*
@@ -34,15 +35,28 @@ methods get_method(char* method) {
  This function is the first step to create a request out of a raw buffer that comes from the socket.
 */
 void create_request(char request_buffer[], request* req) {
-    char* line = strtok(request_buffer, "\r\n");
+    char* save_ptr2;
+    char* save_ptr1;
+    char* line = strtok_r(request_buffer, "\r\n", &save_ptr2);
     char* request_line = line;
-    line = strtok(NULL, "\r\n");
+    line = strtok_r(NULL, "\r\n", &save_ptr2);
+    ll_node root;
+    ll_node* last = &root;
 
     // handle headers
     while(line != NULL) {
-        line = strtok(NULL, "\r\n");
+        // add line
+        ll_node* next = malloc(sizeof(ll_node));
+        char* key = strtok_r(line, ": ", &save_ptr1);
+        char* val = strtok_r(NULL, ": ", &save_ptr1);
+        next->key = key;
+        next->value = val;
+        last->next = next;
+        last = next;
+        line = strtok_r(NULL, "\r\n", &save_ptr2);
     }
 
+    req->headers = root.next;
     char* method = strtok(request_line, " ");
     req->method = get_method(method);
     char* uri = strtok(NULL, " ");
