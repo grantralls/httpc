@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 /**
  * This function will copy the entire route found in the first line of a request. Beginning at "/" and ending at the first whitespace encountered.
  * It is the responsibility of the consumer to null terminate the buffer.
@@ -46,13 +45,13 @@ methods get_method(char* method) {
  * @internal
  * @return -1 if there was some error, 0 if no error was encountered
  *
- * TODO: This doesn't stop for the body, I should fix that.
  */
-int get_headers(char header_buffer[], ll_node* root) {
+int get_headers(char header_buffer[], request* req) {
+    ll_node root;
     if(header_buffer == NULL) {
         return -1;
     }
-    ll_node* last = root;
+    ll_node* last = &root;
     char* header_save = NULL;
     char* line_save = NULL;
     char* line = strtok_r(header_buffer, "\r\n", &line_save);
@@ -82,10 +81,19 @@ int get_headers(char header_buffer[], ll_node* root) {
         last = next;
         line = strtok_r(NULL, "\r\n", &line_save);
     }
+    req->headers = root.next;
     return 0;
 }
-
-int get_request_line(char request_line[], request* req) {
+/**
+ * Given an [http request line](https://www.rfc-editor.org/rfc/rfc1945#section-5.1), break out the method & uri, then add it to the request struct.
+ *
+ * @internal
+ */
+int get_request_line(char** s_headers_buffer, char request_buffer[], request* req) {
+    char* request_line = strtok_r(request_buffer, "\r\n", s_headers_buffer);
+    if(request_line == NULL) {
+        return -1;
+    }
     char* method = strtok(request_line, " ");
     if(method == NULL) {
         return -1;
@@ -107,26 +115,21 @@ int get_request_line(char request_line[], request* req) {
  * TODO: this function could properly be simplified
  */
 int create_request(char request_buffer[], request* req) {
+    char* body = strstr(request_buffer, "\r\n\r\n");
+    if(body == NULL) {
+        return -1;
+    }
+    // this null terminator will stop the header strtok scan from going into the body section
+    *body = '\0';
+
     assert(req != NULL);
     char* headers_buffer = NULL;
-    char* request_line = strtok_r(request_buffer, "\r\n", &headers_buffer);
-    if(request_line == NULL) {
+    if(get_request_line(&headers_buffer, request_buffer, req) == -1) {
+        return -1;
+    }
+    if(get_headers(headers_buffer, req) == -1) {
         return -1;
     }
 
-    ll_node root;
-    if(get_headers(headers_buffer, &root) == -1) {
-        return -1;
-    }
-    req->headers = root.next;
-    if(get_request_line(request_line, req) == -1) {
-        return -1;
-    }
-
-    // TODO: remove this catch all when I'm done
-    char* request_line_item = strtok(NULL, " ");
-    while(request_line_item != NULL) {
-        request_line_item = strtok(NULL, " ");
-    }
     return 0;
 }
