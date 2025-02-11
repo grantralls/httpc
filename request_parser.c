@@ -39,6 +39,27 @@ methods get_method(char* method) {
     assert("invalid method from the request");
     return GET;
 }
+ll_node* get_header(char* header_line, char** header_save) {
+    ll_node* next = malloc(sizeof(ll_node));
+    if(next == NULL) {
+        return NULL;
+    }
+
+    char* key = strtok_r(header_line, ": ", header_save);
+    // Malformed request
+    if(key == NULL) {
+        return NULL;
+    }
+
+    char* val = strtok_r(NULL, ": ", header_save);
+    // Malformed request
+    if(val == NULL) {
+        return NULL;
+    }
+    next->key = key;
+    next->value = val;
+    return next;
+}
 /**
  * Given the first header line, the headers root, and the line save pointer, add each header to the headers linked list
  *
@@ -46,40 +67,26 @@ methods get_method(char* method) {
  * @return -1 if there was some error, 0 if no error was encountered
  *
  */
-int get_headers(char header_buffer[], request* req) {
+int get_headers(char headers_buffer[], request* req) {
     ll_node root;
-    if(header_buffer == NULL) {
+    if(headers_buffer == NULL) {
         return -1;
     }
     ll_node* last = &root;
     char* header_save = NULL;
     char* line_save = NULL;
-    char* line = strtok_r(header_buffer, "\r\n", &line_save);
+    char* header_line = strtok_r(headers_buffer, "\r\n", &line_save);
 
     // handle headers
-    while(line != NULL) {
+    while(header_line != NULL) {
         // add line
-        ll_node* next = malloc(sizeof(ll_node));
+        ll_node* next = get_header(header_line, &header_save);
         if(next == NULL) {
             return -1;
         }
-
-        char* key = strtok_r(line, ": ", &header_save);
-        // Malformed request
-        if(key == NULL) {
-            return -1;
-        }
-
-        char* val = strtok_r(NULL, ": ", &header_save);
-        // Malformed request
-        if(val == NULL) {
-            return -1;
-        }
-        next->key = key;
-        next->value = val;
         last->next = next;
         last = next;
-        line = strtok_r(NULL, "\r\n", &line_save);
+        header_line = strtok_r(NULL, "\r\n", &line_save);
     }
     req->headers = root.next;
     return 0;
