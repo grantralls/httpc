@@ -48,9 +48,15 @@ methods get_method(char* method) {
  *
  * TODO: This doesn't stop for the body, I should fix that.
  */
-int get_headers(char line[], ll_node* root, char* line_save) {
+int get_headers(char header_buffer[], ll_node* root) {
+    if(header_buffer == NULL) {
+        return -1;
+    }
     ll_node* last = root;
     char* header_save = NULL;
+    char* line_save = NULL;
+    char* line = strtok_r(header_buffer, "\r\n", &line_save);
+
     // handle headers
     while(line != NULL) {
         // add line
@@ -78,31 +84,8 @@ int get_headers(char line[], ll_node* root, char* line_save) {
     }
     return 0;
 }
-/**
- * This function is the first step to create a request out of a raw buffer that comes from the socket.
- *
- * @internal
- * @return -1 if there was an error, 0 if there wasn't
- *
- * TODO: this function could properly be simplified
- */
-int create_request(char request_buffer[], request* req) {
-    assert(req != NULL);
 
-    char* line_save = NULL;
-    char* line = strtok_r(request_buffer, "\r\n", &line_save);
-    if(line == NULL) {
-        return -1;
-    }
-    char* request_line = line;
-    line = strtok_r(NULL, "\r\n", &line_save);
-    ll_node root;
-
-    if(get_headers(line, &root, line_save) == -1) {
-        return -1;
-    }
-
-    req->headers = root.next;
+int get_request_line(char request_line[], request* req) {
     char* method = strtok(request_line, " ");
     if(method == NULL) {
         return -1;
@@ -113,7 +96,34 @@ int create_request(char request_buffer[], request* req) {
         return -1;
     }
     req->uri = uri;
+    return 0;
+}
+/**
+ * This function is the first step to create a request out of a raw buffer that comes from the socket.
+ *
+ * @internal
+ * @return -1 if there was an error, 0 if there wasn't
+ *
+ * TODO: this function could properly be simplified
+ */
+int create_request(char request_buffer[], request* req) {
+    assert(req != NULL);
+    char* headers_buffer = NULL;
+    char* request_line = strtok_r(request_buffer, "\r\n", &headers_buffer);
+    if(request_line == NULL) {
+        return -1;
+    }
 
+    ll_node root;
+    if(get_headers(headers_buffer, &root) == -1) {
+        return -1;
+    }
+    req->headers = root.next;
+    if(get_request_line(request_line, req) == -1) {
+        return -1;
+    }
+
+    // TODO: remove this catch all when I'm done
     char* request_line_item = strtok(NULL, " ");
     while(request_line_item != NULL) {
         request_line_item = strtok(NULL, " ");
