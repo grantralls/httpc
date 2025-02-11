@@ -14,7 +14,7 @@ linkedlist.o: linkedlist.c linkedlist.h
 valgrind-check: httpc
 	valgrind --leak-check=yes --track-origins=yes ./httpc
 clean:
-	rm httpc main.o httplib.o request_parser.o httplib.h.gch
+	rm -f httpc main.o httplib.o request_parser.o httplib.h.gch linkedlist.o linkedlist.h.gch request_parser.h.gch
 	rm -rf ./docs
 docs:
 	doxygen Doxyfile

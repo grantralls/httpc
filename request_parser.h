@@ -21,5 +21,11 @@ typedef struct request {
  * @return number of bytes written. 0 if the route is bigger than the buffer
  */
 int parse_route_from_request(char request[], char buffer[], size_t buf_size);
-void create_request(char request_buffer[], request* req);
+/**
+ * @brief given a request buffer, populate the request struct
+ * @param request_buffer the buffer to use as a source
+ * @param req the request struct to populate
+ * @return -1 if there was an error, 0 if there wasn't
+ */
+int create_request(char request_buffer[], request* req);
 #endif

@@ -2,8 +2,12 @@
 #include <stdio.h>
 
 void test_callback_1(request req) {
-    printf("header 1: %s\n", req.headers->next->key);
-    printf("header 1: %s\n", req.headers->next->value);
+    ll_node* header = req.headers;
+    while(header != NULL) {
+        printf("key: %s\n", header->key);
+        printf("val: %s\n", header->value);
+        header = header->next;
+    }
     printf("req uri: %s\n", req.uri);
 }
 
