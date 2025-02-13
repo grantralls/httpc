@@ -179,7 +179,6 @@ int create_server(void) {
     int opt = 1; 
     int addrlen = sizeof(address);
     char buffer[1024] = { 0 };
-    char* hello = "HTTP/1.0 200 \r\n";
 
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) { 
         perror("socket failed"); 

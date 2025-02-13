@@ -122,6 +122,7 @@ int get_request_line(char** s_headers_buffer, char request_buffer[], request* re
  * TODO: this function could properly be simplified
  */
 int create_request(char request_buffer[], request* req) {
+    assert(req != NULL);
     char* body = strstr(request_buffer, "\r\n\r\n");
     if(body == NULL) {
         return -1;
@@ -129,7 +130,6 @@ int create_request(char request_buffer[], request* req) {
     // this null terminator will stop the header strtok scan from going into the body section
     *body = '\0';
 
-    assert(req != NULL);
     char* headers_buffer = NULL;
     if(get_request_line(&headers_buffer, request_buffer, req) == -1) {
         return -1;
