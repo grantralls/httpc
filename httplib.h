@@ -6,7 +6,7 @@
  */
 
 #include "request_parser.h"
-typedef void (*callback_t)(request);
+typedef char* (*callback_t)(request);
 
 enum ERROR_CODES { RR_DUPLICATE_ROUTE, RR_OK };
 
