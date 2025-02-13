@@ -7,8 +7,6 @@
 /**
  * This function will copy the entire route found in the first line of a request. Beginning at "/" and ending at the first whitespace encountered.
  * It is the responsibility of the consumer to null terminate the buffer.
- *
- * @internal
  */
 int parse_route_from_request(char request[], char buffer[], size_t buf_size) {
     char* start = request;
@@ -62,10 +60,6 @@ ll_node* get_header(char* header_line, char** header_save) {
 }
 /**
  * Given the first header line, the headers root, and the line save pointer, add each header to the headers linked list
- *
- * @internal
- * @return -1 if there was some error, 0 if no error was encountered
- *
  */
 int get_headers(char headers_buffer[], request* req) {
     ll_node root;
@@ -92,12 +86,11 @@ int get_headers(char headers_buffer[], request* req) {
     return 0;
 }
 /**
- * Given an [http request line](https://www.rfc-editor.org/rfc/rfc1945#section-5.1), break out the method & uri, then add it to the request struct.
- *
+ * Given an [http request line](https://www.rfc-editor.org/rfc/rfc1945#section-5.1), break out the method & uri, then add it to the request struct. Use headers_buffer as a save pointer. This will make it so it points to the headers, as they come right after the first "\r\n".
  * @internal
  */
-int get_request_line(char** s_headers_buffer, char request_buffer[], request* req) {
-    char* request_line = strtok_r(request_buffer, "\r\n", s_headers_buffer);
+int get_request_line(char** headers_buffer, char request_buffer[], request* req) {
+    char* request_line = strtok_r(request_buffer, "\r\n", headers_buffer);
     if(request_line == NULL) {
         return -1;
     }
@@ -115,11 +108,6 @@ int get_request_line(char** s_headers_buffer, char request_buffer[], request* re
 }
 /**
  * This function is the first step to create a request out of a raw buffer that comes from the socket.
- *
- * @internal
- * @return -1 if there was an error, 0 if there wasn't
- *
- * TODO: this function could properly be simplified
  */
 int create_request(char request_buffer[], request* req) {
     assert(req != NULL);
