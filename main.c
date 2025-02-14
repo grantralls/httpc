@@ -1,7 +1,9 @@
 #include "httplib.h"
+#include "response.h"
 #include <stdio.h>
+#include <stdlib.h>
 
-char* test_callback_1(request req) {
+void test_callback_1(request req, response* resp) {
     ll_node* header = req.headers;
     while(header != NULL) {
         printf("key: %s\n", header->key);
@@ -9,7 +11,9 @@ char* test_callback_1(request req) {
         header = header->next;
     }
     printf("req uri: %s\n", req.uri);
-    return "HTTP/1.0 200 \r\n\r\n<h1>IT'S ALIVE</h1>";
+    resp->code = 200;
+
+    return;
 }
 
 

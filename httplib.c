@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include "httplib.h"
 #include "request_parser.h"
+#include "response.h"
 #define PORT 8080
 
 node root;
@@ -74,9 +75,10 @@ node* trace_tree_exact(char route[]) {
     return ptr;
 }
 
-char* root_callback(request req) {
+void root_callback(request req, response* resp) {
     printf("req uri: %s\n", req.uri);
-    return "";
+    resp->code = 404;
+    return;
 }
 
 void setup(void) {
@@ -213,9 +215,12 @@ int create_server(void) {
         puts("crap");
     }
     node* n = trace_tree_exact(req.uri);
-    char* response = n->callback(req);
+    response resp;
+    n->callback(req, &resp);
+    char response_buffer[20] = { '\0' };
+    unparse_response(&resp, response_buffer);
 
-    send(new_socket, response, strlen(response), 0);
+    send(new_socket, response_buffer, strlen(response_buffer), 0);
     printf("Hello message sent\n");
 
     // closing the connected socket  
