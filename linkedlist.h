@@ -7,7 +7,8 @@ typedef struct ll_node {
     struct ll_node* next;
 } ll_node;
 
-void push_back(ll_node* root, char* key, char* val);
-ll_node* get_last(ll_node* root);
+void ll_push_back(ll_node* root, char* key, char* val);
+ll_node* ll_get_last(ll_node* root);
+ll_node* ll_create(char* key, char* value);
 
 #endif
