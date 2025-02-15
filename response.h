@@ -9,6 +9,9 @@ typedef struct response {
     int code;
 } response;
 
+/**
+ * @brief transform a request struct into a valid html response using the buffer
+ */
 void unparse_response(response* resp, char* buffer);
 
 #endif

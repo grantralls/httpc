@@ -1,17 +1,14 @@
 #include "httplib.h"
 #include "response.h"
-#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 void test_callback_1(request req, response* resp) {
-    ll_node* header = req.headers;
-    while(header != NULL) {
-        printf("key: %s\n", header->key);
-        printf("val: %s\n", header->value);
-        header = header->next;
-    }
     resp->code = 200;
-    resp->body = "Hello there from the body!!!";
+    char* contents = "Hello there from the body!!!!";
+    char* body = calloc(strlen(contents) + 1, sizeof(char));
+    strncpy(body, contents, strlen(contents));
+    resp->body = body;
 
     return;
 }

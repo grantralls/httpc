@@ -2,6 +2,6 @@
 #include <stdio.h>
 
 void unparse_response(response* resp, char* buffer) {
-    sprintf(buffer, "HTTP/1.0 %d \r\n\r\n", resp->code);
+    sprintf(buffer, "HTTP/1.0 %d \r\n\r\n %s", resp->code, resp->body);
     return;
 }
