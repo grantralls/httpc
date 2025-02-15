@@ -10,5 +10,6 @@ typedef struct ll_node {
 void ll_push_back(ll_node* root, char* key, char* val);
 ll_node* ll_get_last(ll_node* root);
 ll_node* ll_create(char* key, char* value);
+void ll_destroy(ll_node* root);
 
 #endif

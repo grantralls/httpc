@@ -32,6 +32,9 @@ ll_node* ll_get_last(ll_node *root) {
 }
 
 void ll_destroy(ll_node* root) {
+    if(root == NULL) {
+        return;
+    }
     // TODO: handle when root is null
     if(root->next == NULL) {
         free(root);

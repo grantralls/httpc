@@ -5,6 +5,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include "httplib.h"
+#include "linkedlist.h"
 #include "request_parser.h"
 #include "response.h"
 #define PORT 8080
@@ -219,9 +220,12 @@ int create_server(void) {
     n->callback(req, &resp);
     char response_buffer[20] = { '\0' };
     unparse_response(&resp, response_buffer);
+    printf("BODY: %s\n", resp.body);
 
     send(new_socket, response_buffer, strlen(response_buffer), 0);
     printf("Hello message sent\n");
+    ll_destroy(req.headers);
+    ll_destroy(resp.headers);
 
     // closing the connected socket  
     close(new_socket);

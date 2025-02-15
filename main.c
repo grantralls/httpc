@@ -10,12 +10,11 @@ void test_callback_1(request req, response* resp) {
         printf("val: %s\n", header->value);
         header = header->next;
     }
-    printf("req uri: %s\n", req.uri);
     resp->code = 200;
+    resp->body = "Hello there from the body!!!";
 
     return;
 }
-
 
 int main() {
     setup();
