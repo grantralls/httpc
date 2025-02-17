@@ -211,14 +211,20 @@ int create_server(void) {
     read(new_socket, buffer, 1023);
 
     request req;
-    int res = create_request(buffer, &req);
-    if(res == -1) {
-        puts("crap");
-    }
-    node* n = trace_tree_exact(req.uri);
+    req.headers = NULL;
+
     response resp;
     resp.headers = NULL;
-    n->callback(req, &resp);
+    resp.body = "";
+
+    int res = create_request(buffer, &req);
+    if(res == -1) {
+        resp.code = 400;
+    } else {
+        node* n = trace_tree_exact(req.uri);
+        n->callback(req, &resp);
+    }
+
     int response_size = strlen(resp.body) + 3 + 16;
     char response_buffer[response_size];
     unparse_response(&resp, response_buffer);
@@ -226,7 +232,9 @@ int create_server(void) {
 
     send(new_socket, response_buffer, strlen(response_buffer), 0);
 
-    free(resp.body);
+    if(strcmp("", resp.body) != 0) {
+        free(resp.body);
+    }
     ll_destroy(req.headers);
     ll_destroy(resp.headers);
 
