@@ -5,9 +5,9 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include "httplib.h"
-#include "linkedlist.h"
-#include "request_parser.h"
-#include "response.h"
+#include "linkedlist/linkedlist.h"
+#include "request_parser/request_parser.h"
+#include "response/response.h"
 #define PORT 8080
 
 node root;
@@ -217,9 +217,12 @@ int create_server(void) {
     }
     node* n = trace_tree_exact(req.uri);
     response resp;
+    resp.headers = NULL;
     n->callback(req, &resp);
-    char response_buffer[20] = { '\0' };
+    int response_size = strlen(resp.body) + 3 + 16;
+    char response_buffer[response_size];
     unparse_response(&resp, response_buffer);
+    response_buffer[response_size - 1] = '\0';
 
     send(new_socket, response_buffer, strlen(response_buffer), 0);
 
