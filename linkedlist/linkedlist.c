@@ -35,10 +35,10 @@ void ll_destroy(ll_node* root) {
     if(root == NULL) {
         return;
     }
-    // TODO: handle when root is null
-    if(root->next == NULL) {
-        free(root);
-        return;
+    if(root->next != NULL) {
+        ll_destroy(root->next);
     }
-    ll_destroy(root->next);
+
+    free(root);
+    return;
 }
