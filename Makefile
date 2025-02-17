@@ -1,15 +1,16 @@
 CC = gcc
 CFLAGS = -std=c17 -ggdb -D_POSIX_C_SOURCE=200809L -pedantic-errors -Wall -Wextra
-OBJ_FILES = ./build/main.o ./build/httplib.o ./build/linkedlist.o ./build/response.o ./build/request_parser.o
+OBJ_FILES = ./build/httplib.o ./build/linkedlist.o ./build/response.o ./build/request_parser.o
 
 httpc: $(OBJ_FILES)
-	$(CC) $(CFLAGS) -o httpc $(OBJ_FILES)
+	ar rcs ./build/libhttpc.a $(OBJ_FILES)
 
-test: httplib.o httplib_test.c
-	$(CC) $(CFLAGS) -o test httplib_test.c ./build/httplib.o
+test: httplib_test.c httpc ./test/main.o
+	$(CC) $(CFLAGS) -L ./build -o run-tests httplib_test.c -l:libhttpc.a
+	$(CC) $(CFLAGS) -L ./build -o run-test-server ./test/main.c -l:libhttpc.a
 
-./build/main.o: main.c httplib.h response/response.h
-	$(CC) $(CFLAGS) -c main.c -o ./build/main.o
+./test/main.o: ./test/main.c httplib.h response/response.h
+	$(CC) $(CFLAGS) -c ./test/main.c -o ./test/main.o
 
 ./build/httplib.o: httplib.c httplib.h
 	$(CC) $(CFLAGS) -c httplib.c -o ./build/httplib.o
@@ -29,7 +30,7 @@ valgrind-check: httpc
 
 # Cleanup compiled files
 clean:
-	rm -f httpc test $(OBJ_FILES)
+	rm -f httpc $(OBJ_FILES)
 	rm -f **/*.o **/*.h.gch
 	rm -rf ./docs
 

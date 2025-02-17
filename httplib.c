@@ -222,7 +222,11 @@ int create_server(void) {
         resp.code = 400;
     } else {
         node* n = trace_tree_exact(req.uri);
-        n->callback(req, &resp);
+        if(n == NULL) {
+            resp.code = 404;
+        } else {
+            n->callback(req, &resp);
+        }
     }
 
     int response_size = strlen(resp.body) + 3 + 16;

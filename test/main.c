@@ -1,5 +1,5 @@
-#include "httplib.h"
-#include "response/response.h"
+#include "../httplib.h"
+#include "../response/response.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
