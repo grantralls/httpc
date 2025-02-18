@@ -222,7 +222,7 @@ int create_server(void) {
         resp.code = 400;
     } else {
         node* n = trace_tree_exact(req.uri);
-        if(n == NULL) {
+        if(n == NULL || n->callback == NULL) {
             resp.code = 404;
         } else {
             n->callback(req, &resp);
