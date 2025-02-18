@@ -22,13 +22,34 @@ ll_node* ll_create(char* key, char* val) {
     return new_node;
 }
 
-ll_node* ll_get_last(ll_node *root) {
+ll_node* ll_get_last(ll_node* root) {
     // TODO: handle when root is null
     if(root->next == NULL) {
         return root;
     }
 
     return ll_get_last(root->next);
+}
+
+ll_node* ll_clone(ll_node* root) {
+    ll_node* new_root = malloc(sizeof(ll_node));
+    new_root->key = root->key;
+    new_root->value = root->value;
+
+    ll_node* temp = new_root;
+    ll_node* root_temp = root;
+
+    while(root_temp != NULL) {
+        temp->key = root->key;
+        temp->value = root->value;
+        root_temp = root_temp->next;
+        if(root_temp != NULL) {
+            temp->next = malloc(sizeof(ll_node));
+            temp = temp->next;
+        }
+    }
+
+    return new_root;
 }
 
 void ll_destroy(ll_node* root) {
