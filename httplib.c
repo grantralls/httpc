@@ -5,7 +5,9 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include "httplib.h"
-#include "request_parser.h"
+#include "linkedlist/linkedlist.h"
+#include "request_parser/request_parser.h"
+#include "response/response.h"
 #define PORT 8080
 
 node root;
@@ -74,9 +76,10 @@ node* trace_tree_exact(char route[]) {
     return ptr;
 }
 
-char* root_callback(request req) {
+void root_callback(request req, response* resp) {
     printf("req uri: %s\n", req.uri);
-    return "";
+    resp->code = 404;
+    return;
 }
 
 void setup(void) {
@@ -208,15 +211,36 @@ int create_server(void) {
     read(new_socket, buffer, 1023);
 
     request req;
+    req.headers = NULL;
+
+    response resp;
+    resp.headers = NULL;
+    resp.body = "";
+
     int res = create_request(buffer, &req);
     if(res == -1) {
-        puts("crap");
+        resp.code = 400;
+    } else {
+        node* n = trace_tree_exact(req.uri);
+        if(n == NULL || n->callback == NULL) {
+            resp.code = 404;
+        } else {
+            n->callback(req, &resp);
+        }
     }
-    node* n = trace_tree_exact(req.uri);
-    char* response = n->callback(req);
 
-    send(new_socket, response, strlen(response), 0);
-    printf("Hello message sent\n");
+    int response_size = strlen(resp.body) + 3 + 16;
+    char response_buffer[response_size];
+    unparse_response(&resp, response_buffer);
+    response_buffer[response_size - 1] = '\0';
+
+    send(new_socket, response_buffer, strlen(response_buffer), 0);
+
+    if(strcmp("", resp.body) != 0) {
+        free(resp.body);
+    }
+    ll_destroy(req.headers);
+    ll_destroy(resp.headers);
 
     // closing the connected socket  
     close(new_socket);

@@ -5,8 +5,9 @@
  * @file httplib.h
  */
 
-#include "request_parser.h"
-typedef char* (*callback_t)(request);
+#include "request_parser/request_parser.h"
+#include "response/response.h"
+typedef void (*callback_t)(request, response*);
 
 enum ERROR_CODES { RR_DUPLICATE_ROUTE, RR_OK };
 

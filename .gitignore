@@ -1,7 +1,9 @@
 # Custom
-test
+build
 docs/
 httpc
+run-tests
+run-test-server
 
 # Prerequisites
 *.d

@@ -1,5 +1,5 @@
 #include "request_parser.h"
-#include "linkedlist.h"
+#include "../linkedlist/linkedlist.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,6 +42,9 @@ ll_node* get_header(char* header_line, char** header_save) {
     if(next == NULL) {
         return NULL;
     }
+    next->next = NULL;
+    next->key = NULL;
+    next->value = NULL;
 
     char* key = strtok_r(header_line, ": ", header_save);
     // Malformed request
