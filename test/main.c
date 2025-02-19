@@ -20,6 +20,11 @@ void test_callback_1(request req, response* resp) {
 }
 
 void echo_headers(request req, response* resp) {
+    ll_node* header = malloc(sizeof(ll_node));
+    header->next = NULL;
+    header->key = "key";
+    header->value = "value";
+    resp->headers = header;
     resp->code = 200;
     printf("%s\n", req.uri);
 
