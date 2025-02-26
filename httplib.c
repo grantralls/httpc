@@ -229,7 +229,8 @@ int create_server(void) {
         }
     }
 
-    int response_size = strlen(resp.body) + 3 + 16;
+    int headers_size = strlen(ll_create_headers(resp.headers, 0));
+    int response_size = strlen(resp.body) + 19 + headers_size + strlen("OK");
     char response_buffer[response_size];
     unparse_response(&resp, response_buffer);
     response_buffer[response_size - 1] = '\0';

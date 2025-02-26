@@ -22,8 +22,12 @@ void test_callback_1(request req, response* resp) {
 void echo_headers(request req, response* resp) {
     ll_node* header = malloc(sizeof(ll_node));
     header->next = NULL;
-    header->key = "key";
-    header->value = "value";
+    header->key = "Content-Type";
+    header->value = "text/html";
+    char* contents = "<h1>Some Content</h1>";
+    char* body = calloc(strlen(contents) + 1, sizeof(char));
+    strncpy(body, contents, strlen(contents));
+    resp->body = body;
     resp->headers = header;
     resp->code = 200;
     printf("%s\n", req.uri);

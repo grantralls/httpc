@@ -1,4 +1,6 @@
 #include "linkedlist.h"
+#include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -62,4 +64,31 @@ void ll_destroy(ll_node* root) {
 
     free(root);
     return;
+}
+
+char* ll_to_header(ll_node* node) {
+    // plus 3 for the ": " and "\n"
+    int len = strlen(node->key) + strlen(node->value) + 3;
+    char* res = calloc(len, sizeof(char));
+    strcat(res, node->key);
+    strcat(res, ": ");
+    strcat(res, node->value);
+    strcat(res, "\n");
+    return res;
+}
+
+/**
+ * Unless you know what you are doing, set size to 0
+ */
+char* ll_create_headers(ll_node* node, size_t size) {
+    if(node == NULL) {
+        return calloc(size, sizeof(char));
+    }
+
+    char* buffer = ll_create_headers(node->next, size + strlen(node->key) + strlen(node->value) + 3);
+    strcat(buffer, node->key);
+    strcat(buffer, ":");
+    strcat(buffer, node->value);
+    strcat(buffer, "\r\n");
+    return buffer;
 }
