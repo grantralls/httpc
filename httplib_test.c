@@ -114,6 +114,6 @@ int main() {
     test_should_handle_duplicate_segments();
     test_trace_tree();
 
-    printf("Tests passed!\n");
+    puts("Tests passed!");
     return -1;
 }
