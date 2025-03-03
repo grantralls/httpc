@@ -10,7 +10,8 @@
 #include "response/response.h"
 #define PORT 8080
 
-node root;
+node get_root;
+node post_root;
 
 node* find_node_by_val(node* n, char* val) {
     if(!strcmp(n->val, val)) {
@@ -40,7 +41,7 @@ node* trace_tree(char route[]) {
     char copiedRoute[strlen(route)];
     strcpy(copiedRoute, route);
     char* tok = strtok(copiedRoute, "/");
-    node* currNode = &root;
+    node* currNode = &get_root;
 
     while(tok != NULL) {
         node* newCurrNode = find_tok(tok, currNode->children);
@@ -58,11 +59,11 @@ node* trace_tree(char route[]) {
 /**
  * This is very similar to @ref trace_tree. The key difference is, a node is only returned when the entire route was able to be traced on the tree. This will typically be used for, finding the handling node for an incoming request. 
  */
-node* trace_tree_exact(char route[]) {
-    char copiedRoute[strlen(route)];
+node* trace_tree_exact(char route[], node* root) {
+    char copiedRoute[strlen(route) + 1];
     strcpy(copiedRoute, route);
     char* tok = strtok(copiedRoute, "/");
-    node* ptr = &root;
+    node* ptr = root;
 
     while(tok != NULL) {
         node* newPtr = find_tok(tok, ptr->children);
@@ -83,10 +84,10 @@ void root_callback(request req, response* resp) {
 }
 
 void setup(void) {
-    root.val = "root";
-    root.callback = &root_callback;
-    root.siblings = NULL;
-    root.children = NULL;
+    get_root.val = "root";
+    get_root.callback = &root_callback;
+    get_root.siblings = NULL;
+    get_root.children = NULL;
 }
 
 int register_route(char route[], callback_t callback) {
@@ -107,7 +108,7 @@ int register_route(char route[], callback_t callback) {
         // get the first token that doesn't exist in the tree
         tok = strtok(NULL, "/");
     } else {
-        targetNode = &root;
+        targetNode = &get_root;
     }
 
 
@@ -221,7 +222,7 @@ int create_server(void) {
     if(res == -1) {
         resp.code = 400;
     } else {
-        node* n = trace_tree_exact(req.uri);
+        node* n = trace_tree_exact(req.uri, &get_root);
         if(n == NULL || n->callback == NULL) {
             resp.code = 404;
         } else {

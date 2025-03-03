@@ -44,7 +44,7 @@ int main() {
 
     create_server();
 
-    destroy_tree(&root);
+    destroy_tree(&get_root);
 
     return 0;
 }

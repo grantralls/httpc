@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -std=c17 -ggdb -D_POSIX_C_SOURCE=200809L -pedantic-errors -Wall -Wextra
+CFLAGS = -std=c17 -O0 -ggdb3 -D_POSIX_C_SOURCE=200809L -pedantic-errors -Wall -Wextra
 OBJ_FILES = ./build/httplib.o ./build/linkedlist.o ./build/response.o ./build/request_parser.o
 
 httpc: $(OBJ_FILES)

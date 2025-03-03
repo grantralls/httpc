@@ -25,7 +25,8 @@ typedef struct node {
     callback_t callback;
 } node;
 
-extern node root;
+extern node get_root;
+extern node post_root;
 
 /**
  * @brief gets the node that matches a given val in a DFS manner
@@ -41,7 +42,7 @@ node* trace_tree(char route[]);
 /**
  * @brief returns the node of the last segment in the URI. If a complete trace isn't found, return null.
  */
-node* trace_tree_exact(char route[]);
+node* trace_tree_exact(char route[], node* root);
 /**
  * @brief adds a route to the URI tree
  * @param route an HTTP verb with a route, separated by a space. (eg. "GET /some/complete/route")
