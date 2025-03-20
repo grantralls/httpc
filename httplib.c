@@ -38,7 +38,7 @@ node* find_tok(char val[], node* n) {
  * Given a route, this function will traverse the tree in a DFS manner, using the route as a guide. As the tree is traversed, currNode is updated to be the most recently found node. When a new currNode is unable to be found, or we've reach the end of the route, return currNode.
  */
 node* trace_tree(char route[]) {
-    char copiedRoute[strlen(route)];
+    char copiedRoute[strlen(route) + 1];
     strcpy(copiedRoute, route);
     char* tok = strtok(copiedRoute, "/");
     node* currNode = &get_root;
