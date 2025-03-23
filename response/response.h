@@ -1,3 +1,7 @@
+/**
+ * @file response.h
+ */
+
 #ifndef HTTPLIB_RESPONSE
 #define HTTPLIB_RESPONSE
 

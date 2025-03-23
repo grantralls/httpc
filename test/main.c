@@ -21,15 +21,19 @@ void test_callback_1(request req, response* resp) {
 
 void echo_headers(request req, response* resp) {
     ll_node* header = malloc(sizeof(ll_node));
-    header->next = NULL;
     header->key = "Content-Type";
     header->value = "text/html";
+
+    header->next = ll_clone(req.headers);
+
     char* contents = "<h1>Some Content</h1>";
     char* body = calloc(strlen(contents) + 1, sizeof(char));
     strncpy(body, contents, strlen(contents));
+
     resp->body = body;
     resp->headers = header;
     resp->code = 200;
+
     printf("%s\n", req.uri);
 
     return;
@@ -37,10 +41,10 @@ void echo_headers(request req, response* resp) {
 
 int main() {
     setup();
-    char route2[] = "GET /test/something/something_else";
-    char echo_route[] = "GET /echo";
-    register_route(route2, *test_callback_1);
-    register_route(echo_route, *echo_headers);
+    char route2[] = "/test/something/something_else";
+    char echo_route[] = "/echo";
+    get(route2, *test_callback_1);
+    get(echo_route, *echo_headers);
 
     create_server();
 

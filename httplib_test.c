@@ -17,12 +17,12 @@ void test_uri_with_existing_node() {
     // Arrange
     destroy_tree(&get_root);
     setup();
-    char route1[] = "GET /test/something/something_else";
-    char route2[] = "GET /test/something";
+    char route1[] = "/test/something/something_else";
+    char route2[] = "/test/something";
 
     // Act
-    register_route(route1, *test_callback_1);
-    register_route(route2, *test_callback_2);
+    get(route1, *test_callback_1);
+    get(route2, *test_callback_2);
 
     // Assert
     assert(get_root.children->children->callback == &test_callback_2);
@@ -33,12 +33,12 @@ void test_should_properly_attach_to_children() {
     // Arrange
     destroy_tree(&get_root);
     setup();
-    char parent[] = "GET /parent";
-    char child[] = "GET /parent/child/otherchild";
+    char parent[] = "/parent";
+    char child[] = "/parent/child/otherchild";
 
     // Act
-    register_route(parent, empty_callback);
-    register_route(child, empty_callback);
+    get(parent, empty_callback);
+    get(child, empty_callback);
 
     // Assert
     assert(!strcmp(get_root.children->val, "parent"));
@@ -50,12 +50,12 @@ void test_should_properly_attach_to_children_with_siblings() {
     // Arrange
     destroy_tree(&get_root);
     setup();
-    char route1[] = "GET /parent/onechild";
-    char route2[] = "GET /parent/child/otherchild";
+    char route1[] = "/parent/onechild";
+    char route2[] = "/parent/child/otherchild";
 
     // Act
-    register_route(route1, empty_callback);
-    register_route(route2, empty_callback);
+    get(route1, empty_callback);
+    get(route2, empty_callback);
 
     // Assert
     assert(!strcmp(get_root.children->val, "parent"));
@@ -68,12 +68,12 @@ void test_should_handle_duplicate_segments() {
     // Arrange
     destroy_tree(&get_root);
     setup();
-    char route1[] = "GET /first/second";
-    char route2[] = "GET /second/first";
+    char route1[] = "/first/second";
+    char route2[] = "/second/first";
 
     // Act
-    register_route(route1, empty_callback);
-    register_route(route2, empty_callback);
+    get(route1, empty_callback);
+    get(route2, empty_callback);
 
     // Assert
     assert(!strcmp(get_root.children->val, "second"));
@@ -86,22 +86,22 @@ void test_trace_tree() {
     // Arrange
     destroy_tree(&get_root);
     setup();
-    char route1[] = "GET /parent/onechild";
-    char route2[] = "GET /parent/child/otherchild";
+    char route1[] = "/parent/onechild";
+    char route2[] = "/parent/child/otherchild";
 
     // Act
-    register_route(route1, empty_callback);
-    register_route(route2, empty_callback);
+    get(route1, empty_callback);
+    get(route2, empty_callback);
 
     // Assert
     char uniqueRoute[] = "/a/unique/route";
     char partiallyUniqueRoute[] = "/parent/onechild/unique";
     char perfectMatch[] = "/parent/onechild";
     char perfectMatchAgain[] = "/parent/child/otherchild";
-    assert(!strcmp(trace_tree(uniqueRoute)->val, "root"));
-    assert(!strcmp(trace_tree(partiallyUniqueRoute)->val, "onechild"));
-    assert(!strcmp(trace_tree(perfectMatch)->val, "onechild"));
-    assert(!strcmp(trace_tree(perfectMatchAgain)->val, "otherchild"));
+    assert(!strcmp(trace_tree(uniqueRoute, &get_root)->val, "root"));
+    assert(!strcmp(trace_tree(partiallyUniqueRoute, &get_root)->val, "onechild"));
+    assert(!strcmp(trace_tree(perfectMatch, &get_root)->val, "onechild"));
+    assert(!strcmp(trace_tree(perfectMatchAgain, &get_root)->val, "otherchild"));
     assert(!strcmp(trace_tree_exact(perfectMatch, &get_root)->val, "onechild"));
     assert(trace_tree_exact(uniqueRoute, &get_root) == NULL);
 }

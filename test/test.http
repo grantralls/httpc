@@ -5,4 +5,4 @@ GET http://localhost:8080/echo HTTP/1.0
 Content-Type: text/html
 Authorization: Bearer token
 ?? header Content-Type == text/html
-?? header Authorization == Bearer token
+?? header Authorization == Bearer
