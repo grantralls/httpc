@@ -34,6 +34,10 @@ ll_node* ll_get_last(ll_node* root) {
 }
 
 ll_node* ll_clone(ll_node* root) {
+    if(root == NULL) {
+        return NULL;
+    }
+
     ll_node* new_root = malloc(sizeof(ll_node));
 
     if(new_root == NULL) {
@@ -41,18 +45,14 @@ ll_node* ll_clone(ll_node* root) {
         exit(EXIT_FAILURE);
     }
 
-    new_root->key = root->key;
-    new_root->value = root->value;
-    new_root->next = NULL;
-
     ll_node* temp = new_root;
-    ll_node* root_temp = root;
+    ll_node* ptr = root;
 
-    while(root_temp != NULL) {
-        temp->key = root->key;
-        temp->value = root->value;
-        root_temp = root_temp->next;
-        if(root_temp != NULL) {
+    while(ptr != NULL) {
+        temp->key = ptr->key;
+        temp->value = ptr->value;
+        ptr = ptr->next;
+        if(ptr != NULL) {
             temp->next = malloc(sizeof(ll_node));
 
             if(temp->next == NULL) {
@@ -100,6 +100,7 @@ char* ll_create_headers(ll_node* node, size_t size) {
             perror("linkedlist.c:ll_create_headers");
             exit(EXIT_FAILURE);
         }
+        return buffer;
     }
 
     int buffer_size = size + strlen(node->key) + strlen(node->value) + 3;

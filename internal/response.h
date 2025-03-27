@@ -1,7 +1,11 @@
+/**
+ * @file response.h
+ */
+
 #ifndef HTTPLIB_RESPONSE
 #define HTTPLIB_RESPONSE
 
-#include "../linkedlist/linkedlist.h"
+#include "linkedlist.h"
 
 typedef struct response {
     char* body;

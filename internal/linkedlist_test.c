@@ -1,4 +1,4 @@
-#include "linkedlist.h"
+#include "./linkedlist.h"
 #include <stdio.h>
 
 int main() {
@@ -12,7 +12,7 @@ int main() {
 
     node.next = &next_node;
 
-    char* headers = create_headers(&node, 0);
+    char* headers = ll_create_headers(&node, 0);
     printf("%s\n", headers);
     return 1;
 }

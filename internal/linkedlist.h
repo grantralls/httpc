@@ -1,3 +1,7 @@
+/**
+ * @file linkedlist.h
+ */
+
 #ifndef HTTPLIB_LL
 #define HTTPLIB_LL
 
@@ -17,6 +21,11 @@ ll_node* ll_clone(ll_node* root);
  * @brief takes a node and converts it into a header line
  */
 char* ll_to_header(ll_node* node);
+/**
+ * @brief Takes a linked list and turns the entire chain into a char* of HTTP headers.
+ * @param node the head of the headers
+ * @param size always set this to zero
+ */
 char* ll_create_headers(ll_node* node, size_t size);
 
 #endif

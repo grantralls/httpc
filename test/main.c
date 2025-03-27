@@ -1,5 +1,5 @@
 #include "../httplib.h"
-#include "../response/response.h"
+#include "../internal/response.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,15 +21,19 @@ void test_callback_1(request req, response* resp) {
 
 void echo_headers(request req, response* resp) {
     ll_node* header = malloc(sizeof(ll_node));
-    header->next = NULL;
     header->key = "Content-Type";
     header->value = "text/html";
+
+    header->next = ll_clone(req.headers);
+
     char* contents = "<h1>Some Content</h1>";
     char* body = calloc(strlen(contents) + 1, sizeof(char));
     strncpy(body, contents, strlen(contents));
+
     resp->body = body;
     resp->headers = header;
     resp->code = 200;
+
     printf("%s\n", req.uri);
 
     return;
@@ -37,14 +41,16 @@ void echo_headers(request req, response* resp) {
 
 int main() {
     setup();
-    char route2[] = "GET /test/something/something_else";
-    char echo_route[] = "GET /echo";
-    register_route(route2, *test_callback_1);
-    register_route(echo_route, *echo_headers);
+    char route2[] = "/test/something/something_else";
+    char echo_route[] = "/echo";
+    char post_route[] = "/post_route";
+
+    get(route2, *test_callback_1);
+    get(echo_route, *echo_headers);
+    post(post_route, *test_callback_1);
 
     create_server();
-
-    destroy_tree(&root);
+    destroy_tree(&get_root);
 
     return 0;
 }
