@@ -1,8 +1,23 @@
-GET http://localhost:8080 HTTP/1.0
+@host=http://localhost:8080
+
+###
+
+# @title 404 created but unregistered node
+# @description The node exists in the tree, but only to serve some child node.
+GET / HTTP/1.0
 ?? status == 404 
 
-GET http://localhost:8080/echo HTTP/1.0
+###
+
+# @title echo headers back
+GET /echo HTTP/1.0
 Content-Type: text/html
 Authorization: Bearer token
 ?? header Content-Type == text/html
-?? header Authorization == Bearer
+?? header Authorization == Bearer token
+
+###
+
+POST /post_route HTTP/1.0
+?? status == 200
+

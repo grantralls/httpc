@@ -1,5 +1,5 @@
 #include "../httplib.h"
-#include "../response/response.h"
+#include "../internal/response.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -43,11 +43,13 @@ int main() {
     setup();
     char route2[] = "/test/something/something_else";
     char echo_route[] = "/echo";
+    char post_route[] = "/post_route";
+
     get(route2, *test_callback_1);
     get(echo_route, *echo_headers);
+    post(post_route, *test_callback_1);
 
     create_server();
-
     destroy_tree(&get_root);
 
     return 0;
