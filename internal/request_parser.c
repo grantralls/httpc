@@ -1,5 +1,5 @@
 #include "request_parser.h"
-#include "../linkedlist/linkedlist.h"
+#include "linkedlist.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>

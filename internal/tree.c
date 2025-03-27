@@ -1,8 +1,11 @@
-#include "./tree.h"
+#include "tree.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+/**
+ * @brief search the current node and all siblings for a value, do not traverse any deeper in the tree
+ */
 node* find_tok(char val[], node* n) {
     while(n != NULL && strcmp(val, n->val) != 0) {
         n = n->siblings;

@@ -5,7 +5,7 @@
  */
 
 #define HTTPLIB_REQUEST_PARSER
-#include "../linkedlist/linkedlist.h"
+#include "linkedlist.h"
 #include <stddef.h>
 typedef enum methods { GET, POST, HEAD } methods;
 typedef struct request {

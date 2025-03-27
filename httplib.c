@@ -5,9 +5,9 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include "httplib.h"
-#include "linkedlist/linkedlist.h"
-#include "request_parser/request_parser.h"
-#include "response/response.h"
+#include "internal/linkedlist.h"
+#include "internal/request_parser.h"
+#include "internal/response.h"
 #define PORT 8080
 
 node get_root;
@@ -24,6 +24,11 @@ void setup(void) {
     get_root.callback = &root_callback;
     get_root.siblings = NULL;
     get_root.children = NULL;
+
+    post_root.val = "root";
+    post_root.callback = &root_callback;
+    post_root.siblings = NULL;
+    post_root.children = NULL;
 }
 
 int register_route(char route[], callback_t callback, node* root_node) {
@@ -119,6 +124,7 @@ int create_server(void) {
         perror("listen");
         exit(EXIT_FAILURE);
     }
+
     if ((new_socket = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen)) < 0) {
         perror("accept");
         exit(EXIT_FAILURE);

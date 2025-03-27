@@ -9,23 +9,23 @@ test: httplib_test.c httpc ./test/main.o
 	$(CC) $(CFLAGS) -L ./build -o run-tests httplib_test.c -l:libhttpc.a
 	$(CC) $(CFLAGS) -L ./build -o run-test-server ./test/main.c -l:libhttpc.a
 
-./test/main.o: ./test/main.c httplib.h response/response.h
+./test/main.o: ./test/main.c httplib.h internal/response.h
 	$(CC) $(CFLAGS) -c ./test/main.c -o ./test/main.o
 
 ./build/httplib.o: httplib.c httplib.h
 	$(CC) $(CFLAGS) -c httplib.c -o ./build/httplib.o
 
-./build/request_parser.o: request_parser/request_parser.c request_parser/request_parser.h
-	$(CC) $(CFLAGS) -c request_parser/request_parser.c -o ./build/request_parser.o
+./build/request_parser.o: internal/request_parser.c internal/request_parser.h
+	$(CC) $(CFLAGS) -c internal/request_parser.c -o ./build/request_parser.o
 
-./build/linkedlist.o: linkedlist/linkedlist.c linkedlist/linkedlist.h
-	$(CC) $(CFLAGS) -c linkedlist/linkedlist.c -o ./build/linkedlist.o
+./build/linkedlist.o: internal/linkedlist.c internal/linkedlist.h
+	$(CC) $(CFLAGS) -c internal/linkedlist.c -o ./build/linkedlist.o
 
-./build/response.o: response/response.c response/response.h
-	$(CC) $(CFLAGS) -c response/response.c -o ./build/response.o
+./build/response.o: internal/response.c internal/response.h
+	$(CC) $(CFLAGS) -c internal/response.c -o ./build/response.o
 
-./build/tree.o: ./uri-tree/tree.c ./uri-tree/tree.h  
-	$(CC) $(CFLAGS) -c ./uri-tree/tree.c -o ./build/tree.o
+./build/tree.o: internal/tree.c internal/tree.h  
+	$(CC) $(CFLAGS) -c internal/tree.c -o ./build/tree.o
 
 
 # Valgrind memory check

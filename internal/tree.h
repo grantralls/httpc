@@ -5,8 +5,8 @@
 #ifndef URI_TREE
 #define URI_TREE
 
-#include "../request_parser/request_parser.h"
-#include "../response/response.h"
+#include "request_parser.h"
+#include "response.h"
 typedef void (*callback_t)(request, response*);
 
 /**
