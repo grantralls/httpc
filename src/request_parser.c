@@ -47,18 +47,16 @@ ll_node* get_header(char* header_line, char** header_save) {
     next->value = NULL;
 
     char* key = strtok_r(header_line, ": ", header_save);
+
+    // TODO: This is really awful
+    (*header_save)++;
+
     // Malformed request
     if(key == NULL) {
         return NULL;
     }
-
-    char* val = strtok_r(NULL, ": ", header_save);
-    // Malformed request
-    if(val == NULL) {
-        return NULL;
-    }
     next->key = key;
-    next->value = val;
+    next->value = *header_save;
     return next;
 }
 /**
