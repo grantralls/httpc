@@ -35,7 +35,7 @@ jobs:
         uses: actions/configure-pages@v5
       - uses: ssciwr/doxygen-install@v1
       - name: Create Docs Directory
-        run: make docs
+        run:  doxygen Doxyfile
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
