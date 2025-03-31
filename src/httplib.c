@@ -98,7 +98,7 @@ int post(char route[], callback_t callback) {
     return register_route(route, callback, &post_root);
 }
 
-int create_server(void) {
+int http_listen(void) {
     int server_fd, new_socket;
     struct sockaddr_in address;
     int opt = 1; 
@@ -127,47 +127,46 @@ int create_server(void) {
         exit(EXIT_FAILURE);
     }
 
-    if ((new_socket = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen)) < 0) {
-        perror("accept");
-        exit(EXIT_FAILURE);
-    }
-    read(new_socket, buffer, 1023);
-
-    request req;
-    req.headers = NULL;
-
-    response resp;
-    resp.headers = NULL;
-    resp.body = "";
-
-    int res = create_request(buffer, &req);
-    if(res == -1) {
-        resp.code = 400;
-    } else {
-        node* n = trace_tree_exact(req.uri, &get_root);
-        if(n == NULL || n->callback == NULL) {
-            resp.code = 404;
-        } else {
-            n->callback(req, &resp);
+    while(1) {
+        if ((new_socket = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen)) < 0) {
+            perror("accept");
+            exit(EXIT_FAILURE);
         }
+        read(new_socket, buffer, 1023);
+
+        request req;
+        req.headers = NULL;
+
+        response resp;
+        resp.headers = NULL;
+        memset(resp.body, '\0', sizeof(resp.body));
+
+        int res = create_request(buffer, &req);
+        if(res == -1) {
+            resp.code = 400;
+        } else {
+            node* n = trace_tree_exact(req.uri, &get_root);
+            if(n == NULL || n->callback == NULL) {
+                resp.code = 404;
+            } else {
+                n->callback(req, &resp);
+            }
+        }
+
+        int headers_size = strlen(ll_create_headers(resp.headers, 0));
+        int response_size = strlen(resp.body) + 19 + headers_size + strlen("OK");
+        char response_buffer[response_size];
+        unparse_response(&resp, response_buffer);
+        response_buffer[response_size - 1] = '\0';
+
+        send(new_socket, response_buffer, strlen(response_buffer), 0);
+
+        ll_destroy(req.headers);
+        ll_destroy(resp.headers);
+
+        // closing the connected socket  
+        close(new_socket);
     }
-
-    int headers_size = strlen(ll_create_headers(resp.headers, 0));
-    int response_size = strlen(resp.body) + 19 + headers_size + strlen("OK");
-    char response_buffer[response_size];
-    unparse_response(&resp, response_buffer);
-    response_buffer[response_size - 1] = '\0';
-
-    send(new_socket, response_buffer, strlen(response_buffer), 0);
-
-    if(strcmp("", resp.body) != 0) {
-        free(resp.body);
-    }
-    ll_destroy(req.headers);
-    ll_destroy(resp.headers);
-
-    // closing the connected socket  
-    close(new_socket);
     // closing the listening socket
     shutdown(server_fd, SHUT_RDWR);
     return 0;

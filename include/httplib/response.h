@@ -7,8 +7,10 @@
 
 #include "linkedlist.h"
 
+#define MAX_RESPONSE_BODY 4096
+
 typedef struct response {
-    char* body;
+    char body[MAX_RESPONSE_BODY];
     struct ll_node* headers;
     int code;
 } response;
