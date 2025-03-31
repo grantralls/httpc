@@ -4,10 +4,12 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include "httplib.h"
-#include "internal/linkedlist.h"
-#include "internal/request_parser.h"
-#include "internal/response.h"
+#include "httplib/httplib.h"
+#include "httplib/linkedlist.h"
+#include "httplib/request_parser.h"
+#include "httplib/response.h"
+#include "httplib/tree.h"
+
 #define PORT 8080
 
 node get_root;

@@ -1,11 +1,11 @@
-#include "./linkedlist.h"
+#include "httplib/linkedlist.h"
 #include <stdio.h>
 
-int main() {
-    ll_node node = {};
+int main(void) {
+    ll_node node;
     node.key = "Some-key";
     node.value = "some-value";
-    ll_node next_node = {};
+    ll_node next_node;
     next_node.key = "next-key";
     next_node.value = "next-value";
     next_node.next = NULL;
@@ -14,5 +14,5 @@ int main() {
 
     char* headers = ll_create_headers(&node, 0);
     printf("%s\n", headers);
-    return 1;
+    return 0;
 }
