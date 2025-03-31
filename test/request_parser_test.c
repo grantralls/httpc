@@ -3,7 +3,7 @@
 #include <string.h>
 #include "httplib/request_parser.h"
 
-int main() {
+int main(void) {
     char* header_save = NULL;
     char input[] = "Authorization: Bearer token";
     ll_node* node = get_header(input, &header_save);

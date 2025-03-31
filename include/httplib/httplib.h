@@ -31,7 +31,7 @@ int register_route(char route[], callback_t callback, node* root_node);
 /**
  * TODO: Create the server
  */
-int create_server(void);
+int http_listen(void);
 /**
  * @brief this needs to be ran before registering any routes.
  */

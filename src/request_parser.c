@@ -48,8 +48,9 @@ ll_node* get_header(char* header_line, char** header_save) {
 
     char* key = strtok_r(header_line, ": ", header_save);
 
-    // FIX: This is really awful
-    (*header_save)++;
+    while(**header_save == ' ') {
+        (*header_save)++;
+    }
 
     // Malformed request
     if(key == NULL) {
