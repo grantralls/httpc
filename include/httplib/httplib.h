@@ -5,8 +5,6 @@
  * @file httplib.h
  */
 
-#include "request_parser.h"
-#include "response.h"
 #include "tree.h"
 
 enum ERROR_CODES { RR_DUPLICATE_ROUTE, RR_OK };

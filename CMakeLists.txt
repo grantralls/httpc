@@ -1,22 +1,18 @@
-cmake_minimum_required(VERSION 3.10)
-project(Httpc)
+cmake_minimum_required(VERSION 3.28)
+project(http_server VERSION 0.0.1 LANGUAGES C)
 
 # Export Compile Commands for Clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Create a library from the source files
-add_library(Httpc STATIC src/httplib.c src/linkedlist.c src/request_parser.c src/response.c src/tree.c)
+if(CMAKE_BUILD_TYPE STREQUAL "")
+  message(FATAL_ERROR "Build type not specified!")
+endif()
 
-add_executable(tester test/request_parser_test.c src/request_parser.c)
-
-# Set include directories for users
-target_include_directories(tester PUBLIC include)
-
-# Set include directories for users
-target_include_directories(Httpc PUBLIC include)
-
-# Set version information (optional)
-set_target_properties(Httpc PROPERTIES VERSION 1.0.0 SOVERSION 1)
+add_library(common_properties INTERFACE)
+target_compile_options(common_properties INTERFACE -Wall -Wextra)
+target_compile_features(common_properties INTERFACE c_std_17)
 
 enable_testing()
-add_test(NAME some_test COMMAND tester)
+add_subdirectory(src/)
+add_subdirectory(example/)
+add_subdirectory(test/)
