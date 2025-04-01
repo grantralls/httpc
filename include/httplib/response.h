@@ -18,6 +18,6 @@ typedef struct response {
 /**
  * @brief transform a request struct into a valid html response using the buffer
  */
-void unparse_response(response* resp, char* buffer);
+void unparse_response(response* resp, char* headers, char* buffer);
 
 #endif

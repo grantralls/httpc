@@ -94,14 +94,17 @@ int get_headers(char headers_buffer[], request* req) {
 int get_request_line(char** headers_buffer, char request_buffer[], request* req) {
     char* request_line = strtok_r(request_buffer, "\r\n", headers_buffer);
     if(request_line == NULL) {
+        puts("here");
         return -1;
     }
-    char* method = strtok(request_line, " ");
+    char* save_ptr = NULL;
+    char* method = strtok_r(request_line, " ", &save_ptr);
     if(method == NULL) {
+        puts("method");
         return -1;
     }
     req->method = get_method(method);
-    char* uri = strtok(NULL, " ");
+    char* uri = strtok_r(NULL, " ", &save_ptr);
     if(uri == NULL) {
         return -1;
     }
@@ -113,8 +116,11 @@ int get_request_line(char** headers_buffer, char request_buffer[], request* req)
  */
 int create_request(char request_buffer[], request* req) {
     assert(req != NULL);
+    assert(strlen(request_buffer) > 0);
     char* body = strstr(request_buffer, "\r\n\r\n");
     if(body == NULL) {
+        puts(request_buffer);
+        puts("Missing body");
         return -1;
     }
     // this null terminator will stop the header strtok scan from going into the body section
@@ -122,9 +128,13 @@ int create_request(char request_buffer[], request* req) {
 
     char* headers_buffer = NULL;
     if(get_request_line(&headers_buffer, request_buffer, req) == -1) {
+        puts("broken request line");
+        exit(EXIT_FAILURE);
         return -1;
     }
     if(get_headers(headers_buffer, req) == -1) {
+        puts("broken headers");
+        exit(EXIT_FAILURE);
         return -1;
     }
 

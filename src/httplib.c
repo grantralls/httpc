@@ -1,9 +1,11 @@
+#include <assert.h>
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <pthread.h>
 #include "httplib/httplib.h"
 #include "httplib/linkedlist.h"
 #include "httplib/request_parser.h"
@@ -98,12 +100,70 @@ int post(char route[], callback_t callback) {
     return register_route(route, callback, &post_root);
 }
 
+void* handle_connection(void* sock_desc) {
+    int new_socket = *(int*)sock_desc;
+    char buffer[4096] = { 0 };
+    //ssize_t bytes_read = read(new_socket, buffer, 1023);
+    ssize_t bytes_read = recv(new_socket, buffer, sizeof(buffer) - 1, 0);
+
+    if(bytes_read < 0) {
+        perror("failed to read bytes");
+        exit(EXIT_FAILURE);
+    }
+
+    if(bytes_read == 0) {
+        close(new_socket);
+        pthread_exit(EXIT_SUCCESS);
+        return NULL;
+    }
+
+    request req;
+    req.headers = NULL;
+
+    response resp;
+    resp.headers = NULL;
+    memset(resp.body, '\0', sizeof(resp.body));
+
+    int res = create_request(buffer, &req);
+    if(res == -1) {
+        puts("sending 400");
+        resp.code = 400;
+    } else {
+        node* n = trace_tree_exact(req.uri, &get_root);
+        if(n == NULL || n->callback == NULL) {
+            resp.code = 404;
+        } else {
+            n->callback(req, &resp);
+        }
+    }
+
+    char* headers = ll_create_headers(resp.headers, 0);
+    int headers_size = strlen(headers);
+    int response_size = 4096;
+    //char* response_buffer = "HTTP/1.0 200 OK\r\n";
+    char response_buffer[response_size];
+    if(snprintf(response_buffer, sizeof(response_buffer) - 1,"HTTP/1.0 %d OK\r\n%s\r\n", resp.code, headers) < 0) {
+        perror("failed sprintf");
+    }
+    response_buffer[response_size - 1] = '\0';
+
+    send(new_socket, response_buffer, strlen(response_buffer), 0);
+
+    ll_destroy(req.headers);
+    ll_destroy(resp.headers);
+
+    // closing the connected socket  
+    close(new_socket);
+    pthread_exit(NULL);
+
+    return NULL;
+}
+
 int http_listen(void) {
     int server_fd, new_socket;
     struct sockaddr_in address;
     int opt = 1; 
     int addrlen = sizeof(address);
-    char buffer[1024] = { 0 };
 
     if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) { 
         perror("socket failed"); 
@@ -128,44 +188,19 @@ int http_listen(void) {
     }
 
     while(1) {
-        if ((new_socket = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen)) < 0) {
+        int* new_socket = malloc(sizeof(int));
+        if ((*new_socket = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen)) < 0) {
             perror("accept");
             exit(EXIT_FAILURE);
         }
-        read(new_socket, buffer, 1023);
 
-        request req;
-        req.headers = NULL;
-
-        response resp;
-        resp.headers = NULL;
-        memset(resp.body, '\0', sizeof(resp.body));
-
-        int res = create_request(buffer, &req);
-        if(res == -1) {
-            resp.code = 400;
-        } else {
-            node* n = trace_tree_exact(req.uri, &get_root);
-            if(n == NULL || n->callback == NULL) {
-                resp.code = 404;
-            } else {
-                n->callback(req, &resp);
-            }
+        //handle_connection(&new_socket);
+        pthread_t pid;
+        if(pthread_create(&pid, NULL, &handle_connection, new_socket)) {
+            perror("failed to create thread");
+            exit(EXIT_FAILURE);
         }
-
-        int headers_size = strlen(ll_create_headers(resp.headers, 0));
-        int response_size = strlen(resp.body) + 19 + headers_size + strlen("OK");
-        char response_buffer[response_size];
-        unparse_response(&resp, response_buffer);
-        response_buffer[response_size - 1] = '\0';
-
-        send(new_socket, response_buffer, strlen(response_buffer), 0);
-
-        ll_destroy(req.headers);
-        ll_destroy(resp.headers);
-
-        // closing the connected socket  
-        close(new_socket);
+        pthread_detach(pid);
     }
     // closing the listening socket
     shutdown(server_fd, SHUT_RDWR);
