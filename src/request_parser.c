@@ -96,12 +96,13 @@ int get_request_line(char** headers_buffer, char request_buffer[], request* req)
     if(request_line == NULL) {
         return -1;
     }
-    char* method = strtok(request_line, " ");
+    char* save_ptr = NULL;
+    char* method = strtok_r(request_line, " ", &save_ptr);
     if(method == NULL) {
         return -1;
     }
     req->method = get_method(method);
-    char* uri = strtok(NULL, " ");
+    char* uri = strtok_r(NULL, " ", &save_ptr);
     if(uri == NULL) {
         return -1;
     }
@@ -113,6 +114,8 @@ int get_request_line(char** headers_buffer, char request_buffer[], request* req)
  */
 int create_request(char request_buffer[], request* req) {
     assert(req != NULL);
+    assert(strlen(request_buffer) > 0);
+
     char* body = strstr(request_buffer, "\r\n\r\n");
     if(body == NULL) {
         return -1;
@@ -122,9 +125,11 @@ int create_request(char request_buffer[], request* req) {
 
     char* headers_buffer = NULL;
     if(get_request_line(&headers_buffer, request_buffer, req) == -1) {
+        exit(EXIT_FAILURE);
         return -1;
     }
     if(get_headers(headers_buffer, req) == -1) {
+        exit(EXIT_FAILURE);
         return -1;
     }
 

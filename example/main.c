@@ -6,7 +6,7 @@
 void test_callback(request req, response* resp) {
     (void)req;
     resp->code = 200;
-    strcpy(resp->body, "Hello there!\n");
+    strncpy(resp->body, "Hello there!\n", MAX_RESPONSE_BODY - 1);
     return;
 }
 
@@ -15,7 +15,7 @@ int main() {
     setup();
 
     // the same callback will serve the same route on both post and get
-    char* route = "/get_greeting";
+    char* route = "/greeting";
     get(route, &test_callback);
     post(route, &test_callback);
 
