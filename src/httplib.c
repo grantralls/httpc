@@ -38,65 +38,73 @@ void setup(void) {
 
 int register_route(char route[], callback_t callback, node* root_node) {
     // get the node I am going to attach too
-    node* targetNode = trace_tree(route, root_node);
+    node* target_node = trace_tree(route, root_node);
 
     char* fsegment = strtok(route, "/");
-    if(strcmp(targetNode->val, "root") != 0) {
+    if(strcmp(target_node->val, "root") != 0) {
         // update the token until it is the same as targetNode's token
-        while(strcmp(fsegment, targetNode->val) != 0) {
+        while(strcmp(fsegment, target_node->val) != 0) {
             fsegment = strtok(NULL, "/");
         }
 
         // get the first token that doesn't exist in the tree
         fsegment = strtok(NULL, "/");
     } else {
-        targetNode = root_node;
+        target_node = root_node;
     }
 
 
     if(fsegment == NULL) {
-        if(targetNode->callback != NULL) {
+        if(target_node->callback != NULL) {
             // there exists no token that doesn't already exist in the tree
             return RR_DUPLICATE_ROUTE;
         } else {
-            targetNode->callback = callback;
+            target_node->callback = callback;
             return RR_OK;
         }
     }
 
     // keep a pointer to the last created node so I can attach the callback
-    node* leafNode = NULL;
+    node* leaf_node = NULL;
 
+    // if the target_node already has children, we need to add the first new leaf_node to the children of the target
+    if(target_node->children != NULL) {
+        // create the leaf_node
+        if((leaf_node = malloc(sizeof(node))) == NULL) {
+            perror("httplib.c:register_route failed to allocate new leaf_node inside sibling prepend");
+        }
 
-    if(targetNode->children != NULL) {
-        node* temp = targetNode->children;
+        leaf_node->val = fsegment;
+        leaf_node->children = NULL;
 
-        leafNode = malloc(sizeof(node));
-        leafNode->val = fsegment;
-        leafNode->siblings = temp;
-        leafNode->children = NULL;
+        // we will prepend the leaf_node to the siblings of the target node
+        leaf_node->siblings = target_node->children;
 
-        targetNode->children = leafNode;
-        targetNode->callback = NULL;
-        targetNode = leafNode;
+        target_node->children = leaf_node;
+        target_node->callback = NULL;
+        target_node = leaf_node;
 
+        // move to the next fsegment
         fsegment = strtok(NULL, "/");
     }
 
     while(fsegment != NULL) {
-        leafNode = malloc(sizeof(node));
-        leafNode->val = fsegment;
-        leafNode->siblings = NULL;
-        leafNode->children = NULL;
-        leafNode->callback = NULL;
+        if((leaf_node = malloc(sizeof(node))) == NULL) {
+            perror("httplib.c:register_route failed to allocate new leaf_node inside children append");
+        }
 
-        targetNode->children = leafNode;
-        targetNode = targetNode->children;
+        leaf_node->val = fsegment;
+        leaf_node->siblings = NULL;
+        leaf_node->children = NULL;
+        leaf_node->callback = NULL;
+
+        target_node->children = leaf_node;
+        target_node = target_node->children;
 
         fsegment = strtok(NULL, "/");
     }
 
-    leafNode->callback = callback;
+    leaf_node->callback = callback;
     return RR_OK;
 }
 
@@ -154,8 +162,7 @@ void* handle_connection(void* sock_desc) {
     char response_buffer[response_size];
     response_buffer[response_size - 1] = '\0';
 
-    // Take the response struct, headers, and put them into the request buffer
-    unparse_response(&resp, headers, request_buffer);
+    unparse_response(&resp, headers, response_buffer);
 
     if(send(new_socket, response_buffer, strlen(response_buffer), 0) == -1) {
         perror("httplib.c:handle_connection failed to send");
@@ -220,6 +227,7 @@ int http_listen(void) {
 
         if(pthread_detach(pid)) {
             perror("httplib.c:http_listen failed to detach");
+            exit(EXIT_FAILURE);
         }
     }
 
